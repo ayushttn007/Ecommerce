@@ -92,4 +92,5 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         tokenServices.setTokenStore(this.tokenStore);
         return tokenServices;
     }
+
 }

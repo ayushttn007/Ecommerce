@@ -26,10 +26,14 @@ public class CustomUserDetailService implements UserDetailsService {
     @Autowired
     private UserRepo userRepository;
 
-    @Bean
-    public PasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder();
-    }
+
+    @Autowired
+    BCryptPasswordEncoder passwordEncoder;
+
+//    @Bean
+//    public PasswordEncoder passwordEncoder(){
+//        return new BCryptPasswordEncoder();
+//    }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException{
@@ -40,8 +44,8 @@ public class CustomUserDetailService implements UserDetailsService {
         }
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
-                user.getPassword(),
-                user.isActive(),
+                passwordEncoder.encode(user.getPassword()),
+                true,
                 true,
                 true,
                 true,

@@ -8,11 +8,14 @@ import javax.persistence.*;
 @Entity
 @Getter
 @Setter
+
+
 public class Role {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
+
     private long id;
 
     @Column(name = "AUTHORITY")
