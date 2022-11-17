@@ -42,6 +42,7 @@ public class CustomUserDetailService implements UserDetailsService {
             throw new UsernameNotFoundException("We cannot find an account with that email address");
 
         }
+
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 passwordEncoder.encode(user.getPassword()),
@@ -49,9 +50,11 @@ public class CustomUserDetailService implements UserDetailsService {
                 true,
                 true,
                 true,
+
                 getAuthorities(user.getRole())
         );
     }
+
 
     private Collection<? extends GrantedAuthority> getAuthorities(Role roles) {
         List<GrantedAuthority> authorities = new ArrayList<>();

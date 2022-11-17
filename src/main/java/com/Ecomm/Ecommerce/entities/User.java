@@ -2,6 +2,7 @@ package com.Ecomm.Ecommerce.entities;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -50,11 +51,20 @@ public class User {
     @Column(name = "Password_Update_Date")
     private Date passwordUpdateDate;
 
+    @Column(name = "Verification_Code")
+    private String verificationCode;
+
+    @Column(name = "verificationtoken_createdat")
+    private String created_at;
+
     @OneToOne(mappedBy = "user",cascade = CascadeType.ALL)
     private Customer customer;
 
     @OneToOne(mappedBy = "user",cascade = CascadeType.ALL)
     private Seller seller;
+
+//    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+//    private verifications verifications;
 
 
     @OneToOne(fetch = FetchType.EAGER)
