@@ -7,11 +7,13 @@ import com.Ecomm.Ecommerce.dto.UserDto;
 import com.Ecomm.Ecommerce.entities.Customer;
 import com.Ecomm.Ecommerce.repos.UserRepo;
 import com.Ecomm.Ecommerce.service.UserService;
+import com.Ecomm.Ecommerce.utils.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.web.bind.annotation.*;
 
 import javax.mail.MessagingException;
@@ -24,6 +26,8 @@ public class Controller {
 @Autowired  UserService userService;
 
 @Autowired  UserRepo userRepo;
+
+@Autowired  EmailService emailService;
 
     @GetMapping(value = "/")
     @ResponseStatus(HttpStatus.ACCEPTED)
@@ -54,24 +58,33 @@ public class Controller {
     // Register APi for Seller
     @PostMapping(value = "api/register",headers = "Role=SELLER")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<String> register(@RequestBody SellerDto sellerDto ){
+    public ResponseEntity<String> register(@RequestBody SellerDto sellerDto, HttpServletRequest request ) throws MessagingException, UnsupportedEncodingException {
 
-        userService.registerSeller(sellerDto,"SELLER");
+        userService.registerSeller(sellerDto,"SELLER",getSiteURL(request));
       return ResponseEntity.ok().body("Register Successfully");
     }
 
-//    @PostMapping(value = "api/login", headers = "Role=CUSTOMER")
-//    @ResponseStatus(HttpStatus.ACCEPTED)
-//    public ResponseEntity<String> login(@RequestBody )
-
-
+    // verify api for register account verification
     @GetMapping("/verify")
-    public String verifyUser(@Param("code") String code) {
-        if (userService.verify(code)) {
-            return "Congratulations, your account has been verified.";
+//    @ResponseStatus(HttpStatus.ACCEPTED)
+    public ResponseEntity<String> verifyUser(@Param("code") String code) {
+
+        if (emailService.verify(code)) {
+            return ResponseEntity.ok().body("Congratulations, your account has been verified.");
         } else {
-            return "Sorry,We could not verify account,It could maybe already verified,or verification link has been Expired";
+            return ResponseEntity.badRequest().body("Sorry,We could not verify account,It could maybe already verified,or verification link has been Expired");
         }
     }
+
+
+    // api for logout user
+    @PostMapping("api/logout")
+    public ResponseEntity<String> logout(HttpServletRequest request){
+       return userService.logOut(request);
+    }
+
+    // api for login user
+
+
 
 }

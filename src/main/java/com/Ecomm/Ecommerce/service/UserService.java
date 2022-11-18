@@ -7,9 +7,16 @@ import com.Ecomm.Ecommerce.entities.*;
 import com.Ecomm.Ecommerce.repos.*;
 import com.Ecomm.Ecommerce.utils.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.OAuth2RefreshToken;
+import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.stereotype.Component;
 
 import javax.mail.MessagingException;
+import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -39,7 +46,11 @@ public class UserService {
     @Autowired
     EmailService emailService;
 
+    @Autowired
+    private TokenStore tokenStore;
 
+@Autowired
+    BCryptPasswordEncoder passwordEncoder;
     public void registerCustomer(CustomerDto customerDto, String role,String siteURL) throws MessagingException, UnsupportedEncodingException {
 
         System.out.println(customerDto);
@@ -52,7 +63,7 @@ public class UserService {
         user.setFirstName(customerDto.getFirstName());
         user.setMiddleName(customerDto.getMiddleName());
         user.setLastName(customerDto.getLastName());
-        user.setPassword(customerDto.getPassword());
+        user.setPassword(passwordEncoder.encode(customerDto.getPassword()));
         user.setRole(newRole);
         // Set customer contact
         Customer customer = new Customer();
@@ -78,7 +89,7 @@ public class UserService {
 
 
         emailService.register(user,siteURL);
-        emailService.sendEmailVerification(user,siteURL);
+//        emailService.sendEmailVerification(user,siteURL);
         userRepo.save(user);
         customerRepo.save(customer);
 //        addressRepo.save(customerAddress);
@@ -86,7 +97,7 @@ public class UserService {
 
     }
 
-    public void registerSeller(SellerDto sellerDto, String role) {
+    public void registerSeller(SellerDto sellerDto, String role, String siteURL) throws MessagingException, UnsupportedEncodingException {
 
         // Create new user
         User user = new User();
@@ -124,6 +135,7 @@ public class UserService {
          sellerAddress.setSeller(newSeller);
      newSeller.setAddress(sellerAddress);
 
+        emailService.register(user,siteURL);
         userRepo.save(user);
         sellerRepo.save(newSeller);
         addressRepo.save(sellerAddress);
@@ -131,81 +143,26 @@ public class UserService {
 
     }
 
-    public boolean verify(String verificationCode)  {
-        User user = userRepo.findByVerificationCode(verificationCode);
-        String verificationTokenDate = user.getCreated_at();
-        String currentDate = emailService.getCurrentTimeUsingCalendar();
-        boolean istokenActive = finddateAndtimeDifference(verificationTokenDate,currentDate);
-       if(!istokenActive){
-           user.setCreated_at(null);
-           user.setVerificationCode(null);
-           return false;
-       }
-       else if (user == null || user.isActive()) {
-            return false;
-        } else {
-            user.setVerificationCode(null);
-            user.setActive(true);
-            userRepo.save(user);
-            return true;
-        }
+public ResponseEntity<String> logOut(HttpServletRequest request){
+    try {
+        String authorization = request.getHeader("Authorization");
+        if (authorization != null && authorization.contains("Bearer")) {
+            String tokenValue = authorization.replace("Bearer", "").trim();
 
+            OAuth2AccessToken accessToken = tokenStore.readAccessToken(tokenValue);
+            tokenStore.removeAccessToken(accessToken);
+
+            //OAuth2RefreshToken refreshToken = tokenStore.readRefreshToken(tokenValue);
+            OAuth2RefreshToken refreshToken = accessToken.getRefreshToken();
+            tokenStore.removeRefreshToken(refreshToken);
+        }
+    } catch (Exception e) {
+        return ResponseEntity.badRequest().body("Invalid access token");
     }
 
-    public boolean finddateAndtimeDifference(String verificationTokenDate,
-                               String currentDate)  {
-        // SimpleDateFormat converts the
-        // string format to date object
-        SimpleDateFormat sdf
-                = new SimpleDateFormat(
-                "dd-MM-yyyy HH:mm:ss");
 
-        // Try Class
-
-            // parse method is used to parse
-            // the text from a string to
-            // produce the date
-        try {
-            Date tokenDate = sdf.parse(verificationTokenDate);
-            Date currentdate = sdf.parse(currentDate);
-
-            // Calucalte time difference
-            // in milliseconds
-            long difference_In_Time = currentdate.getTime() - tokenDate.getTime();
-
-            // Calucalte time difference in seconds,
-            // minutes, hours, years, and days
-//            long difference_In_Seconds = TimeUnit.MILLISECONDS.toSeconds(difference_In_Time) % 60;
-
-            long difference_In_Minutes = TimeUnit.MILLISECONDS.toMinutes(difference_In_Time) % 60;
-
-//            long difference_In_Hours = TimeUnit.MILLISECONDS.toHours(difference_In_Time) % 24;
-
-            long difference_In_Days = TimeUnit.MILLISECONDS.toDays(difference_In_Time) % 365;
-
-            long difference_In_Years = TimeUnit.MILLISECONDS.toDays(difference_In_Time) / 365l;
-
-            // Print the date difference in
-            // years, in days, in hours, in
-            // minutes, and in seconds
-            boolean isValid;
-            if (difference_In_Years > 0 || difference_In_Days > 0) {
-                isValid = false;
-            } else if (difference_In_Minutes > 1) {
-                isValid = false;
-            } else {
-                isValid = true;
-            }
-            return isValid;
-        }catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-            // Print result
-//                  long leftminutes =  difference_In_Years  + difference_In_Days + difference_In_Hours + difference_In_Minutes + difference_In_Seconds;
-//                  return leftminutes;
+    return ResponseEntity.ok().body("Logout successfully");
+}
 
 
-        return false;
-    }
 }
