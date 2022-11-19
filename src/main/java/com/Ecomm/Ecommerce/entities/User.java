@@ -51,12 +51,6 @@ public class User {
     @Column(name = "Password_Update_Date")
     private Date passwordUpdateDate;
 
-    @Column(name = "Verification_Code")
-    private String verificationCode;
-
-    @Column(name = "verificationtoken_createdat")
-    private String created_at;
-
     @OneToOne(mappedBy = "user",cascade = CascadeType.ALL)
     private Customer customer;
 

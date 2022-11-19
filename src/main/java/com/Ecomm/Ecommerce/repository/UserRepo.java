@@ -11,7 +11,5 @@ public interface UserRepo extends JpaRepository<User, Long> {
     public User findByFirstName(@Param("firstName") String firstName);
     public User findByEmail(String Email);
 
-//    @Query("SELECT u FROM User u WHERE u.verificationCode = ?1")
-    public User findByVerificationCode(String VerificationCode);
 
 }

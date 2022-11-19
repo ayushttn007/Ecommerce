@@ -6,21 +6,23 @@ import com.Ecomm.Ecommerce.entities.*;
 import com.Ecomm.Ecommerce.handler.PasswordNotMatchedException;
 import com.Ecomm.Ecommerce.handler.UserAlreadyExistsException;
 import com.Ecomm.Ecommerce.repository.*;
-import com.Ecomm.Ecommerce.service.EmailService;
+import com.Ecomm.Ecommerce.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
+import org.springframework.transaction.annotation.Transactional;
 
-@Component
-public class UserService implements com.Ecomm.Ecommerce.service.UserService {
+@Service
+@Transactional
+public class UserServiceImpl implements UserService {
 
     @Autowired
     RoleRepo roleRepo;
@@ -38,14 +40,14 @@ public class UserService implements com.Ecomm.Ecommerce.service.UserService {
     AddressRepo addressRepo;
 
     @Autowired
-    EmailService emailService;
+    EmailServiceImpl emailService;
 
     @Autowired
     private TokenStore tokenStore;
 
 @Autowired
     BCryptPasswordEncoder passwordEncoder;
-    public void registerCustomer(CustomerDto customerDto, String role,String siteURL) throws MessagingException, UnsupportedEncodingException {
+    public void registerCustomer(CustomerDto customerDto, String role,String siteUrl) throws MessagingException, UnsupportedEncodingException {
 
         System.out.println(customerDto);
         User user = new User();
@@ -91,11 +93,10 @@ public class UserService implements com.Ecomm.Ecommerce.service.UserService {
 
 
 
-        emailService.register(user,siteURL);
-        emailService.sendEmailVerification(user,siteURL);
-        userRepo.save(user);
         customerRepo.save(customer);
-//        addressRepo.save(customerAddress);
+        userRepo.save(user);
+        emailService.sendEmail(user, siteUrl);
+
 
 
     }
@@ -139,10 +140,10 @@ public class UserService implements com.Ecomm.Ecommerce.service.UserService {
          sellerAddress.setSeller(newSeller);
          newSeller.setAddress(sellerAddress);
 
-        emailService.register(user,siteURL);
-        emailService.sendEmailVerification(user,siteURL);
+
         userRepo.save(user);
         sellerRepo.save(newSeller);
+        emailService.sendEmail(user,siteURL);
         addressRepo.save(sellerAddress);
 
 

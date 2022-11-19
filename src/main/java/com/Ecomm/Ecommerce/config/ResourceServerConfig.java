@@ -32,7 +32,8 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
                 .antMatchers("/",
                         "/api/register",
                         "/api/products",
-                        "/verify").permitAll()
+                        "/confirm",
+                        "/api/resend_token").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .sessionManagement()

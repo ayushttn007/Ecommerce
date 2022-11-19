@@ -59,4 +59,12 @@ public class GlobalExceptionHandler {
                 });
         return errors;
     }
+
+    @ExceptionHandler(InvalidTokenException.class)
+    public final ResponseEntity<ErrorFormat> InvalidTokenException(ResourceNotFoundException ex, WebRequest request) throws InvalidTokenException {
+        ErrorFormat errorFormat = new ErrorFormat(LocalDateTime.now(), ex.getMessage(), request.getDescription(false),HttpStatus.NOT_FOUND);
+
+        return new ResponseEntity<>(errorFormat, HttpStatus.NOT_FOUND);
+
+    }
 }
