@@ -1,19 +1,18 @@
-package com.Ecomm.Ecommerce.utils;
+package com.Ecomm.Ecommerce.service;
 
 import com.Ecomm.Ecommerce.entities.User;
-import com.Ecomm.Ecommerce.repos.UserRepo;
+import com.Ecomm.Ecommerce.repository.UserRepo;
 import net.bytebuddy.utility.RandomString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -44,8 +43,9 @@ public class EmailService {
          String fromAddress = fromEmail;
          String senderName = "Ecommerce Application";
          String subject = "Please verify your registration";
-         String content = "Dear [[name]], <br>"
-                 +"Please click the link below to verify your registration:<br>"
+         String emailMessage = "Dear [[name]], <br>"
+                 +"Please click the link below to verify your registration:<br>"+
+                 "This link is valid only for 5 minutes."
                  + "<h3><a href=\"[[URL]]\" target=\"_self\">VERIFY</a></h3>"
                  + "Thank you,<br>"
                  + "Ecommerce Application.";
@@ -56,24 +56,24 @@ public class EmailService {
         helper.setTo(toAddress);
         helper.setSubject(subject);
 
-        content = content.replace("[[name]]", user.getFirstName());
-        String verifyURL = siteURL + "/verify?code=" + user.getVerificationCode();
+        emailMessage = emailMessage.replace("[[name]]", user.getFirstName());
+        String verifyURL = siteURL + "/confirm?code=" + user.getVerificationCode();
 
 
-        content = content.replace("[[URL]]", verifyURL);
+        emailMessage = emailMessage.replace("[[URL]]", verifyURL);
 
-        helper.setText(content, true);
+        helper.setText(emailMessage, true);
 
         javaMailSender.send(message);
     }
 
     public  String getCurrentTimeUsingCalendar() {
         Calendar cal = Calendar.getInstance();
-        Date date=cal.getTime();
+        Date date = cal.getTime();
         DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-        String formattedDate=dateFormat.format(date);
-       return formattedDate;
-//       System.out.println("Current time of the day using Calendar - 2dd-MM-yyyy HH:mm:ss format: "+ formattedDate);
+        String formattedDate = dateFormat.format(date);
+        return formattedDate;
+
     }
     public void register(User user, String siteUrl)throws UnsupportedEncodingException, MessagingException {
 //        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -85,7 +85,7 @@ public class EmailService {
         user.setActive(false);
 
        //  userRepo.save(user);
-        sendEmailVerification(user, siteUrl);
+
     }
 
     public boolean verify(String verificationCode)  {
@@ -95,9 +95,8 @@ public class EmailService {
           return   isVerify = false;
         }
         String verificationTokenDate = user.getCreated_at();
-//        String currentDate = emailService.getCurrentTimeUsingCalendar();
         String currentDate = getCurrentTimeUsingCalendar();
-        boolean istokenActive = finddateAndtimeDifference(verificationTokenDate,currentDate);
+        boolean istokenActive = dateAndtimeDifference(verificationTokenDate,currentDate);
 
         if(!istokenActive){
             user.setVerificationCode(null);
@@ -113,11 +112,11 @@ public class EmailService {
     }
 
 
-    public boolean finddateAndtimeDifference(String verificationTokenDate,
+    public boolean dateAndtimeDifference(String verificationTokenDate,
                                              String currentDate)  {
         // SimpleDateFormat converts the
         // string format to date object
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
         // Try Class
 
@@ -125,20 +124,16 @@ public class EmailService {
         // the text from a string to
         // produce the date
         try {
-            Date tokenDate = sdf.parse(verificationTokenDate);
-            Date currentdate = sdf.parse(currentDate);
-
+            Date tokenDate = simpleDateFormat.parse(verificationTokenDate);
+            Date currentdate = simpleDateFormat.parse(currentDate);
             // Calucalte time difference
             // in milliseconds
             long difference_In_Time = currentdate.getTime() - tokenDate.getTime();
 
             // Calucalte time difference in seconds,
             // minutes, hours, years, and days
-//            long difference_In_Seconds = TimeUnit.MILLISECONDS.toSeconds(difference_In_Time) % 60;
 
             long difference_In_Minutes = TimeUnit.MILLISECONDS.toMinutes(difference_In_Time) % 60;
-
-//            long difference_In_Hours = TimeUnit.MILLISECONDS.toHours(difference_In_Time) % 24;
 
             long difference_In_Days = TimeUnit.MILLISECONDS.toDays(difference_In_Time) % 365;
 
@@ -159,12 +154,11 @@ public class EmailService {
         }catch (ParseException e) {
             e.printStackTrace();
         }
-
-        // Print result
-//                  long leftminutes =  difference_In_Years  + difference_In_Days + difference_In_Hours + difference_In_Minutes + difference_In_Seconds;
-//                  return leftminutes;
-
-
         return false;
+    }
+
+    public String getSiteURL(HttpServletRequest request) {
+        String siteURL = request.getRequestURL().toString();
+        return siteURL.replace(request.getServletPath(), "");
     }
 }

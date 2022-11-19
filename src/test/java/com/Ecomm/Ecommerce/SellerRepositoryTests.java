@@ -3,7 +3,7 @@ package com.Ecomm.Ecommerce;
 import com.Ecomm.Ecommerce.entities.Address;
 import com.Ecomm.Ecommerce.entities.Seller;
 import com.Ecomm.Ecommerce.entities.User;
-import com.Ecomm.Ecommerce.repos.SellerRepo;
+import com.Ecomm.Ecommerce.repository.SellerRepo;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;

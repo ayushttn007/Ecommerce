@@ -19,7 +19,7 @@ public class Customer {
     private long id;
 
     @Column(name = "Contact")
-    private long contact;
+    private String contact;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "User_Id")

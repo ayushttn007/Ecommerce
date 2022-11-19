@@ -2,8 +2,8 @@ package com.Ecomm.Ecommerce;
 
 import com.Ecomm.Ecommerce.entities.Role;
 import com.Ecomm.Ecommerce.entities.User;
-import com.Ecomm.Ecommerce.repos.RoleRepo;
-import com.Ecomm.Ecommerce.repos.UserRepo;
+import com.Ecomm.Ecommerce.repository.RoleRepo;
+import com.Ecomm.Ecommerce.repository.UserRepo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;

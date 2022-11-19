@@ -1,4 +1,4 @@
-package com.Ecomm.Ecommerce.repos;
+package com.Ecomm.Ecommerce.repository;
 
 import com.Ecomm.Ecommerce.entities.Seller;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -1,11 +1,16 @@
 package com.Ecomm.Ecommerce.dto;
 
 import com.Ecomm.Ecommerce.entities.User;
-import lombok.Data;
+
+
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serializable;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
  * A DTO for the {@link com.Ecomm.Ecommerce.entities.Customer} entity
@@ -13,6 +18,9 @@ import java.io.Serializable;
 @Getter
 @Setter
 public class CustomerDto extends UserDto {
-    private long contact;
-//    private  AddressDto address;
+
+    @NotNull(message = "Contact number is mandatory field.")
+    @Size(min=10,max=10,message = "Enter a valid Contact Number.")
+    private String contact;
+    private List<AddressDto> address = new ArrayList<>();
 }
