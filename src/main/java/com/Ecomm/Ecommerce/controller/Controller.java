@@ -1,10 +1,7 @@
 package com.Ecomm.Ecommerce.controller;
 
 
-import com.Ecomm.Ecommerce.dto.CustomerDto;
-import com.Ecomm.Ecommerce.dto.EmailDto;
-import com.Ecomm.Ecommerce.dto.SellerDto;
-import com.Ecomm.Ecommerce.dto.UserDto;
+import com.Ecomm.Ecommerce.dto.*;
 import com.Ecomm.Ecommerce.entities.Seller;
 import com.Ecomm.Ecommerce.repository.UserRepo;
 import com.Ecomm.Ecommerce.service.UserAccountService;
@@ -92,6 +89,14 @@ EmailServiceImpl emailService;
     }
 
     // api for login user
+
+    @PostMapping(path = "/login")
+    public ResponseEntity<String> login(@RequestBody LoginDto loginDto){
+        String userEmail = loginDto.getEmail();
+        String userPassword = loginDto.getPassword();
+       String responseMessage =  userAccountService.userLogin(userEmail, userPassword);
+        return new ResponseEntity<>(responseMessage, HttpStatus.OK);
+    }
 
 
 
