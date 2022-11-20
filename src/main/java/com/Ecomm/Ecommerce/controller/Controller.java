@@ -2,9 +2,12 @@ package com.Ecomm.Ecommerce.controller;
 
 
 import com.Ecomm.Ecommerce.dto.CustomerDto;
+import com.Ecomm.Ecommerce.dto.EmailDto;
 import com.Ecomm.Ecommerce.dto.SellerDto;
 import com.Ecomm.Ecommerce.dto.UserDto;
+import com.Ecomm.Ecommerce.entities.Seller;
 import com.Ecomm.Ecommerce.repository.UserRepo;
+import com.Ecomm.Ecommerce.service.UserAccountService;
 import com.Ecomm.Ecommerce.service.impl.EmailServiceImpl;
 import com.Ecomm.Ecommerce.service.impl.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,20 +32,23 @@ UserServiceImpl userService;
 @Autowired
 EmailServiceImpl emailService;
 
+@Autowired
+    UserAccountService userAccountService;
+
 
     @GetMapping(value = "/")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ResponseEntity<String> home(){
         return ResponseEntity.ok().body("Welcome");
     }
-   // Get mapping for products
+    // Get mapping for products
     @GetMapping(value = "api/products")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ResponseEntity<String> products(){
         return ResponseEntity.ok().body("List of Products");
     }
 
-// Register Api for Seller
+    // Register Api for Seller
     @PostMapping(value = "api/register",headers = "Role=CUSTOMER")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<String> register( @Valid @RequestBody CustomerDto customerDto,HttpServletRequest request) throws MessagingException, UnsupportedEncodingException {
@@ -60,29 +66,29 @@ EmailServiceImpl emailService;
       return ResponseEntity.ok().body("Register Successfully");
     }
 
-    // verify api for register account verification and  send verification link again.
+    // verify api for register account verification and  send verification link again if expire.
     @GetMapping(value ="/confirm")
     @PostMapping(value ="/confirm")
-//    @ResponseStatus(HttpStatus.ACCEPTED)
+    // @ResponseStatus(HttpStatus.ACCEPTED)
     public ResponseEntity<String> verifyUserEmail(@Param("token") String token, HttpServletRequest request) throws MessagingException, UnsupportedEncodingException {
         String siteUrl = emailService.getSiteURL(request);
         String responseMessage = emailService.verifyVerificationToken(token,siteUrl);
        return new ResponseEntity<>(responseMessage,HttpStatus.CREATED);
     }
 
-// api to re-send activation link using email
+    // api to re-send activation link using email.
     @PostMapping(value="/api/resend_token")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public ResponseEntity<String> resendVerification(@RequestBody UserDto user,HttpServletRequest request) throws MessagingException, UnsupportedEncodingException {
-       String userEmail = user.getEmail();
+    public ResponseEntity<String> resendVerification(@Valid @RequestBody EmailDto emailDto, HttpServletRequest request) throws MessagingException, UnsupportedEncodingException {
         String siteUrl = emailService.getSiteURL(request);
-       String responseMessage = emailService.regenerateToken(userEmail,siteUrl);
+        String userEmail = emailDto.getEmail();
+       String responseMessage = emailService.regenerateToken(userEmail, siteUrl);
         return new ResponseEntity<>(responseMessage,HttpStatus.CREATED);
     }
     // api for logout user
     @PostMapping("api/logout")
     public ResponseEntity<String> logout(HttpServletRequest request){
-       return userService.userLogout(request);
+       return userAccountService.userLogout(request);
     }
 
     // api for login user
