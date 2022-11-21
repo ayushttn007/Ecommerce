@@ -33,7 +33,9 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
                         "/api/register",
                         "/api/products",
                         "/confirm",
-                        "/api/resend_token").permitAll()
+                        "/api/resend_token",
+                        "/forgot_password",
+                        "/reset_password").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .sessionManagement()

@@ -3,9 +3,12 @@ package com.Ecomm.Ecommerce.service.impl;
 import com.Ecomm.Ecommerce.dto.PasswordDto;
 import com.Ecomm.Ecommerce.entities.User;
 import com.Ecomm.Ecommerce.entities.VerificationToken;
+import com.Ecomm.Ecommerce.handler.InvalidTokenException;
+import com.Ecomm.Ecommerce.handler.PasswordNotMatchedException;
 import com.Ecomm.Ecommerce.repository.UserRepo;
 import com.Ecomm.Ecommerce.repository.VerificationTokenRepository;
 import com.Ecomm.Ecommerce.service.EmailService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +17,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
@@ -22,17 +26,20 @@ import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import java.io.UnsupportedEncodingException;
 import java.util.Calendar;
+import java.util.Date;
 
 
 @Service
 @Transactional
 public class EmailServiceImpl implements EmailService {
+    @Autowired
+    BCryptPasswordEncoder passwordEncoder;
     protected final Log logger = LogFactory.getLog(getClass());
     @Autowired
     UserRepo userRepo;
     @Autowired
     VerificationTokenRepository verificationTokenRepo;
-    private  JavaMailSender javaMailSender;
+    private final JavaMailSender javaMailSender;
     @Value("${spring.mail.username}")
     private String fromEmail;
 
@@ -121,7 +128,7 @@ public class EmailServiceImpl implements EmailService {
             if (verificationToken.getExpiryDate().getTime() - calendar.getTime().getTime() <= 0) {
                 User newUser = verificationToken.getUser();
                 verificationTokenRepo.delete(verificationToken);
-                logger.info(SiteUrl);
+                logger.info(SiteUrl);  // for debuging purpose
                 sendEmailCustomer(newUser,SiteUrl);
                 return "Verification link is Expired.Please check your mail new Verification link has been sent to your email ";
             }
@@ -166,7 +173,43 @@ public class EmailServiceImpl implements EmailService {
     }
 
    // Method to verify token & give next steps to reset password
-    public String resetPasswordEmail(String token, PasswordDto passwordDto, String siteUrl) {
-        
+    public String resetPasswordEmail(String token, String userPassword, String userConfirmPassword) {
+        // get token from verification repo
+        VerificationToken verificationToken = verificationTokenRepo.findByVerificationToken(token);
+        // check
+        if(verificationToken == null){
+            throw new InvalidTokenException("Given Token is invalid");
+        }
+        else{
+            User user = userRepo.findByEmail(verificationToken.getUser().getEmail());
+            Calendar calendar = Calendar.getInstance();
+            if(verificationToken.getExpiryDate().getTime() - calendar.getTime().getTime() <= 0){
+                verificationTokenRepo.delete(verificationToken);
+                throw new InvalidTokenException("Token has been expired");
+            }else{
+                if(!(userPassword.equals(userConfirmPassword))){
+                    throw new PasswordNotMatchedException("Password do not Matched");
+                }
+                String userEncodePassword = passwordEncoder.encode(userConfirmPassword);
+                user.setPassword(userEncodePassword);
+                user.setPasswordUpdateDate(new Date());
+                userRepo.save(user);
+                verificationTokenRepo.delete(verificationToken);
+                sendPasswordChangeMail(user);
+                return "Password Changed Successfully";
+            }
+
+        }
+    }
+
+    // Method to send successful password change mail.
+    public void sendPasswordChangeMail(User user) {
+        String  message = "Dear [[name]]"
+                + "Congratulations, Your Password Changed Successfully."
+                + "Thank you."
+                + "Ecommerce Application.";
+
+        message = message.replace("[[name]]", user.getFirstName());
+        sendEmail(user,message);
     }
 }

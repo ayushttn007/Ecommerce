@@ -105,9 +105,11 @@ EmailServiceImpl emailService;
     }
 
     @PatchMapping(path= "/reset_password")
-    public ResponseEntity<String> resetPassword(@Param("token") String token, @valid @RequestBody PasswordDto passwordDto, HttpServletRequest request){
+    public ResponseEntity<String> resetPassword(@Param("token") String token, @Valid @RequestBody PasswordDto passwordDto, HttpServletRequest request){
         String siteUrl = emailService.getSiteURL(request);
-        String responseMessage = emailService.resetPasswordEmail(token,passwordDto,siteUrl);
+        String userPassword = passwordDto.getPassword();
+        String userConfirmPassword = passwordDto.getConfirmPassword();
+        String responseMessage = emailService.resetPasswordEmail(token,userPassword,userConfirmPassword);
         return new ResponseEntity<>(responseMessage,HttpStatus.ACCEPTED);
     }
 
