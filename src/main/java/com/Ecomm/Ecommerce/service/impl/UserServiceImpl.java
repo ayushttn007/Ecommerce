@@ -46,7 +46,7 @@ public class UserServiceImpl implements UserService {
 
 @Autowired
     BCryptPasswordEncoder passwordEncoder;
-    public void registerCustomer(CustomerDto customerDto, String role,String siteUrl) throws MessagingException, UnsupportedEncodingException {
+    public void registerCustomer(CustomerDto customerDto, String role,String siteUrl)  {
 
         System.out.println(customerDto);
         User user = new User();
@@ -94,13 +94,13 @@ public class UserServiceImpl implements UserService {
 
         customerRepo.save(customer);
         userRepo.save(user);
-        emailService.sendEmail(user, siteUrl);
+        emailService.sendEmailCustomer(user, siteUrl);
 
 
 
     }
 
-    public void registerSeller(SellerDto sellerDto, String role, String siteURL) throws MessagingException, UnsupportedEncodingException {
+    public void registerSeller(SellerDto sellerDto, String role){
 
         // Create new user
         User user = new User();
@@ -108,10 +108,18 @@ public class UserServiceImpl implements UserService {
         newRole = roleRepo.findByAuthority(role);
 
         // Set User details
-        user.setEmail(sellerDto.getEmail());
+
         user.setFirstName(sellerDto.getFirstName());
         user.setMiddleName(sellerDto.getMiddleName());
         user.setLastName(sellerDto.getLastName());
+
+        String userEmail = sellerDto.getEmail();
+        User userExists =   userRepo.findByEmail(userEmail);
+        if(userExists!= null){
+            throw new UserAlreadyExistsException("An account is already registered with given email");
+        }
+
+        user.setEmail(userEmail);
         user.setPassword(sellerDto.getPassword());
         user.setRole(newRole);
 
@@ -142,7 +150,7 @@ public class UserServiceImpl implements UserService {
 
         userRepo.save(user);
         sellerRepo.save(newSeller);
-        emailService.sendEmail(user,siteURL);
+        emailService.sendEmailSeller(user);
         addressRepo.save(sellerAddress);
 
 

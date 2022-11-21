@@ -61,7 +61,15 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InvalidTokenException.class)
-    public final ResponseEntity<ErrorFormat> InvalidTokenException(ResourceNotFoundException ex, WebRequest request) throws InvalidTokenException {
+    public final ResponseEntity<ErrorFormat> InvalidTokenExceptionHandler(InvalidTokenException ex, WebRequest request) throws InvalidTokenException {
+        ErrorFormat errorFormat = new ErrorFormat(LocalDateTime.now(), ex.getMessage(), request.getDescription(false),HttpStatus.NOT_FOUND);
+
+        return new ResponseEntity<>(errorFormat, HttpStatus.NOT_FOUND);
+
+    }
+
+    @ExceptionHandler(AccountNotActive.class)
+    public final ResponseEntity<ErrorFormat> AccountNotActiveHandler(AccountNotActive ex, WebRequest request) throws AccountNotActive {
         ErrorFormat errorFormat = new ErrorFormat(LocalDateTime.now(), ex.getMessage(), request.getDescription(false),HttpStatus.NOT_FOUND);
 
         return new ResponseEntity<>(errorFormat, HttpStatus.NOT_FOUND);

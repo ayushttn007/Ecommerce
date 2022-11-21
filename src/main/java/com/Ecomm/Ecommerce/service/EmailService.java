@@ -8,10 +8,13 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
 
 public interface EmailService {
-    public void sendEmail(User user, String siteURL) throws MessagingException, UnsupportedEncodingException;
+    public void sendEmail(User user, String mailMessage);
 
-    public String verifyVerificationToken(String token,String SiteUrl) throws MessagingException, UnsupportedEncodingException, InvalidTokenException;
+    public String verifyVerificationToken(String token,String SiteUrl);
 
+
+    public void sendEmailSeller(User user);
+    public void sendEmailCustomer(User user,String siteUrl);
     public String getSiteURL(HttpServletRequest request);
 
 

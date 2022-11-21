@@ -39,42 +39,41 @@ EmailServiceImpl emailService;
         return ResponseEntity.ok().body("Welcome");
     }
     // Get mapping for products
-    @GetMapping(value = "api/products")
+    @GetMapping(path = "api/products")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ResponseEntity<String> products(){
         return ResponseEntity.ok().body("List of Products");
     }
 
     // Register Api for Seller
-    @PostMapping(value = "api/register",headers = "Role=CUSTOMER")
+    @PostMapping(path = "api/register",headers = "Role=CUSTOMER")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<String> register( @Valid @RequestBody CustomerDto customerDto,HttpServletRequest request) throws MessagingException, UnsupportedEncodingException {
+    public ResponseEntity<String> register( @Valid @RequestBody CustomerDto customerDto,HttpServletRequest request){
         String siteUrl = emailService.getSiteURL(request);
         userService.registerCustomer(customerDto,"CUSTOMER",siteUrl);
         return ResponseEntity.ok().body("Please check your email to verify your account.");
     }
 
     // Register APi for Seller
-    @PostMapping(value = "api/register",headers = "Role=SELLER")
+    @PostMapping(path = "api/register",headers = "Role=SELLER")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<String> register(@Valid @RequestBody SellerDto sellerDto, HttpServletRequest request ) throws MessagingException, UnsupportedEncodingException {
-        String siteUrl = emailService.getSiteURL(request);
-        userService.registerSeller(sellerDto,"SELLER",siteUrl);
+    public ResponseEntity<String> register(@Valid @RequestBody SellerDto sellerDto ){
+        userService.registerSeller(sellerDto,"SELLER");
       return ResponseEntity.ok().body("Register Successfully");
     }
 
     // verify api for register account verification and  send verification link again if expire.
-    @GetMapping(value ="/confirm")
-    @PostMapping(value ="/confirm")
+    @GetMapping(path ="/confirm")
+    @PostMapping(path ="/confirm")
     // @ResponseStatus(HttpStatus.ACCEPTED)
-    public ResponseEntity<String> verifyUserEmail(@Param("token") String token, HttpServletRequest request) throws MessagingException, UnsupportedEncodingException {
+    public ResponseEntity<String> verifyUserEmail(@Param("token") String token, HttpServletRequest request){
         String siteUrl = emailService.getSiteURL(request);
         String responseMessage = emailService.verifyVerificationToken(token,siteUrl);
        return new ResponseEntity<>(responseMessage,HttpStatus.CREATED);
     }
 
     // api to re-send activation link using email.
-    @PostMapping(value="/api/resend_token")
+    @PostMapping(path ="/api/resend_token")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ResponseEntity<String> resendVerification(@Valid @RequestBody EmailDto emailDto, HttpServletRequest request) throws MessagingException, UnsupportedEncodingException {
         String siteUrl = emailService.getSiteURL(request);
@@ -83,7 +82,7 @@ EmailServiceImpl emailService;
         return new ResponseEntity<>(responseMessage,HttpStatus.CREATED);
     }
     // api for logout user
-    @PostMapping("api/logout")
+    @PostMapping(path = "api/logout")
     public ResponseEntity<String> logout(HttpServletRequest request){
        return userAccountService.userLogout(request);
     }
@@ -98,6 +97,18 @@ EmailServiceImpl emailService;
         return new ResponseEntity<>(responseMessage, HttpStatus.OK);
     }
 
+    @PostMapping(path="/forgot_password")
+    public ResponseEntity<String> forgotPassword(@Valid @RequestBody EmailDto emailDtO){
+        String userEmail = emailDtO.getEmail();
+        String response = userAccountService.userForgotPassword(userEmail);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 
+    @PatchMapping(path= "/reset_password")
+    public ResponseEntity<String> resetPassword(@Param("token") String token, @valid @RequestBody PasswordDto passwordDto, HttpServletRequest request){
+        String siteUrl = emailService.getSiteURL(request);
+        String responseMessage = emailService.resetPasswordEmail(token,passwordDto,siteUrl);
+        return new ResponseEntity<>(responseMessage,HttpStatus.ACCEPTED);
+    }
 
 }

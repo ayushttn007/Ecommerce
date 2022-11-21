@@ -1,5 +1,6 @@
 package com.Ecomm.Ecommerce.service.impl;
 
+import com.Ecomm.Ecommerce.dto.PasswordDto;
 import com.Ecomm.Ecommerce.entities.User;
 import com.Ecomm.Ecommerce.entities.VerificationToken;
 import com.Ecomm.Ecommerce.repository.UserRepo;
@@ -9,6 +10,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -30,7 +32,7 @@ public class EmailServiceImpl implements EmailService {
     UserRepo userRepo;
     @Autowired
     VerificationTokenRepository verificationTokenRepo;
-    private final JavaMailSender javaMailSender;
+    private  JavaMailSender javaMailSender;
     @Value("${spring.mail.username}")
     private String fromEmail;
 
@@ -41,39 +43,71 @@ public class EmailServiceImpl implements EmailService {
 
 
     @Async
-    public void sendEmail(User user, String siteURL) throws MessagingException, UnsupportedEncodingException {
+    public void sendEmail(User user,String mailMessage){
+        logger.info("SendEmail Executed");
+        String toEmail = user.getEmail();
+        String senderEmail = fromEmail;
+        String senderName = "Ecommerce Application";
+        String subject = "Thank you for Registration";
+        SimpleMailMessage  message = new SimpleMailMessage();
+        message.setFrom(senderEmail);
+        message.setTo(toEmail);
+        message.setSubject(subject);
+        message.setText(mailMessage);
+
+        javaMailSender.send(message);
+    }
+
+    public void sendEmailSeller(User user){
+        logger.info("SendEmailSeller Executed");
+       String  message = "Dear [[name]]"
+               + "Congratulations, Your account has been Created and Waiting for Approval."
+               + "Thank you."
+               + "Ecommerce Application.";
+
+        message = message.replace("[[name]]", user.getFirstName());
+            sendEmail(user,message);
+
+    }
+
+    public void sendEmailCustomer(User user,String siteUrl){
+        logger.info("SendEmailCustomer Executed");
         VerificationToken verificationToken = new VerificationToken(user);
         verificationTokenRepo.save(verificationToken);
-        String toAddress = user.getEmail();
-        String fromAddress = fromEmail;
-        String senderName = "Ecommerce Application";
-        String subject = "Please verify your registration";
         String emailMessage = "Dear [[name]], <br>"
                 + "Please click the link below to verify your registration:<br>" +
                 "This link is valid only for 5 minutes."
                 + "<h3><a href=\"[[URL]]\" target=\"_self\">VERIFY</a></h3>"
                 + "Thank you,<br>"
                 + "Ecommerce Application.";
-        MimeMessage message = javaMailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message);
 
-        helper.setFrom(fromAddress, senderName);
-        helper.setTo(toAddress);
-        helper.setSubject(subject);
-
-        emailMessage = emailMessage.replace("[[name]]", user.getFirstName());
-        String verifyURL = siteURL + "/confirm?token=" + (verificationToken.getVerificationToken());
-
-
+        String verifyURL = siteUrl + "/confirm?token=" + (verificationToken.getVerificationToken());
         emailMessage = emailMessage.replace("[[URL]]", verifyURL);
+        sendEmail(user,emailMessage);
 
-        helper.setText(emailMessage, true);
-
-        javaMailSender.send(message);
     }
 
-    public String verifyVerificationToken(String token, String SiteUrl) throws MessagingException, UnsupportedEncodingException {
+    public void sendEmailForgotPassword(User user) {
+        logger.info("sendEmailForgetPassword Executed");
+        VerificationToken verificationToken = new VerificationToken(user);
+        verificationTokenRepo.save(verificationToken);
+        String emailMessage = "Dear [[name]]"+ "\n" +
+                "We have received a request to Reset your password." +"/n"
+                + "Please click on the following link, (or paste this in your browser) to complete the process within five minutes of receiving it"+"\n\n"
+                +"[[URL]]"+ "\n\n"
+                +"Regards,\n" +
+                "Ecommerce Application";
+        String verifyURL = "localhost:8080" + "/reset_password?token=" + (verificationToken.getVerificationToken());
+        emailMessage = emailMessage.replace("[[URL]]", verifyURL);
+        sendEmail(user,emailMessage);
+    }
+
+    // Method to verify user email verification token
+    public String verifyVerificationToken(String token, String SiteUrl){
+        logger.info("verifyVerificationToken Executed");
+        // take verification Token from verificationToken table using findByVerification query
         VerificationToken verificationToken = verificationTokenRepo.findByVerificationToken(token);
+        // check if verificationToken not exists
         if (verificationToken == null) {
             return "Invalid Token";
         }
@@ -88,7 +122,7 @@ public class EmailServiceImpl implements EmailService {
                 User newUser = verificationToken.getUser();
                 verificationTokenRepo.delete(verificationToken);
                 logger.info(SiteUrl);
-                sendEmail(newUser, SiteUrl);
+                sendEmailCustomer(newUser,SiteUrl);
                 return "Verification link is Expired.Please check your mail new Verification link has been sent to your email ";
             }
             user.setActive(true);
@@ -105,7 +139,8 @@ public class EmailServiceImpl implements EmailService {
 
     }
 
-    public String regenerateToken(String userEmail, String siteUrl) throws MessagingException, UnsupportedEncodingException {
+    public String regenerateToken(String userEmail, String siteUrl){
+        logger.info("regenerateToken Executed");
         User user = userRepo.findByEmail(userEmail);
         // check if user exists
         if (user == null) {
@@ -124,9 +159,14 @@ public class EmailServiceImpl implements EmailService {
             }
             // else send new mail
             else {
-                sendEmail(user, siteUrl);
+                sendEmailCustomer(user, siteUrl);
             }
         }
         return "Check your mail for Account Verification link";
+    }
+
+   // Method to verify token & give next steps to reset password
+    public String resetPasswordEmail(String token, PasswordDto passwordDto, String siteUrl) {
+        
     }
 }
