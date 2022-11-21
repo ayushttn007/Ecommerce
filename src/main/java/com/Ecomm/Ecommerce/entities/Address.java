@@ -1,8 +1,9 @@
 package com.Ecomm.Ecommerce.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Getter;
 import lombok.Setter;
-import org.codehaus.jackson.annotate.JsonBackReference;
+
 
 import javax.persistence.*;
 

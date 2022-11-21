@@ -47,6 +47,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     public List<SellerDao> getRegisterSellers() {
         List<Seller> sellerLists = sellerRepo.findAll();
+        System.out.println(sellerLists.toString());
         List<SellerDao> sellerDaoList =  new ArrayList<>();
 
         sellerLists.forEach((seller) ->
