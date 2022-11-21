@@ -50,12 +50,12 @@ public class EmailServiceImpl implements EmailService {
 
 
     @Async
-    public void sendEmail(User user,String mailMessage){
+    public void sendEmail(User user,String mailMessage,String subjectMessage){
         logger.info("SendEmail Executed");
         String toEmail = user.getEmail();
         String senderEmail = fromEmail;
         String senderName = "Ecommerce Application";
-        String subject = "Thank you for Registration";
+        String subject = subjectMessage;
         SimpleMailMessage  message = new SimpleMailMessage();
         message.setFrom(senderEmail);
         message.setTo(toEmail);
@@ -72,8 +72,9 @@ public class EmailServiceImpl implements EmailService {
                + "Thank you."
                + "Ecommerce Application.";
 
+       String subject = "WAITING FOR APPROVAL";
         message = message.replace("[[name]]", user.getFirstName());
-            sendEmail(user,message);
+            sendEmail(user,message,subject);
 
     }
 
@@ -82,15 +83,16 @@ public class EmailServiceImpl implements EmailService {
         VerificationToken verificationToken = new VerificationToken(user);
         verificationTokenRepo.save(verificationToken);
         String emailMessage = "Dear [[name]], <br>"
-                + "Please click the link below to verify your registration:<br>" +
-                "This link is valid only for 5 minutes."
-                + "<h3><a href=\"[[URL]]\" target=\"_self\">VERIFY</a></h3>"
-                + "Thank you,<br>"
+                + "Please click the link below to verify your registration." +
+                "This link is valid only for 15 minutes." + "\n\n"
+                + "[[URL]]" + "\n\n"
+                + "Regards"
                 + "Ecommerce Application.";
-
+        String subject = "VERIFY YOUR ACCOUNT";
         String verifyURL = siteUrl + "/confirm?token=" + (verificationToken.getVerificationToken());
+        emailMessage = emailMessage.replace("[[name]]", user.getFirstName());
         emailMessage = emailMessage.replace("[[URL]]", verifyURL);
-        sendEmail(user,emailMessage);
+        sendEmail(user,emailMessage,subject);
 
     }
 
@@ -99,14 +101,16 @@ public class EmailServiceImpl implements EmailService {
         VerificationToken verificationToken = new VerificationToken(user);
         verificationTokenRepo.save(verificationToken);
         String emailMessage = "Dear [[name]]"+ "\n" +
-                "We have received a request to Reset your password." +"/n"
+                "We have received a request to Reset your password." +"\n"
                 + "Please click on the following link, (or paste this in your browser) to complete the process within five minutes of receiving it"+"\n\n"
                 +"[[URL]]"+ "\n\n"
                 +"Regards,\n" +
                 "Ecommerce Application";
+        String subject = "FORGOT PASSWORD REQUEST";
         String verifyURL = "localhost:8080" + "/reset_password?token=" + (verificationToken.getVerificationToken());
+        emailMessage = emailMessage.replace("[[name]]", user.getFirstName());
         emailMessage = emailMessage.replace("[[URL]]", verifyURL);
-        sendEmail(user,emailMessage);
+        sendEmail(user,emailMessage,subject);
     }
 
     // Method to verify user email verification token
@@ -162,7 +166,7 @@ public class EmailServiceImpl implements EmailService {
             // delete token if already exists
             if (token != null) {
                 verificationTokenRepo.delete(token);
-                sendEmail(user, siteUrl);
+                sendEmail(user, siteUrl , "");
             }
             // else send new mail
             else {
@@ -205,11 +209,11 @@ public class EmailServiceImpl implements EmailService {
     // Method to send successful password change mail.
     public void sendPasswordChangeMail(User user) {
         String  message = "Dear [[name]]"
-                + "Congratulations, Your Password Changed Successfully."
-                + "Thank you."
+                +"\n\n"+ "Congratulations, Your Password Changed Successfully."
+                +"\n\n"+ "Regards."+"\n"
                 + "Ecommerce Application.";
-
+        String subject = "PASSWORD CHANGED SUCCESSFULLY";
         message = message.replace("[[name]]", user.getFirstName());
-        sendEmail(user,message);
+        sendEmail(user,message,subject);
     }
 }

@@ -5,7 +5,7 @@ import javax.servlet.http.HttpServletRequest;
 
 
 public interface EmailService {
-    public void sendEmail(User user, String mailMessage);
+    public void sendEmail(User user, String mailMessage,String subjectMessage);
 
     public String verifyVerificationToken(String token,String SiteUrl);
 
