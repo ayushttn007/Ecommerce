@@ -2,6 +2,7 @@ package com.Ecomm.Ecommerce.entities;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.codehaus.jackson.annotate.JsonManagedReference;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
@@ -52,9 +53,11 @@ public class User {
     private Date passwordUpdateDate;
 
     @OneToOne(mappedBy = "user",cascade = CascadeType.ALL)
+    @JsonManagedReference
     private Customer customer;
 
     @OneToOne(mappedBy = "user",cascade = CascadeType.ALL)
+    @JsonManagedReference
     private Seller seller;
 
 //    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)

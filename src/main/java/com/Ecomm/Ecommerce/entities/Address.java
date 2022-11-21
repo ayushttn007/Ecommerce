@@ -2,6 +2,7 @@ package com.Ecomm.Ecommerce.entities;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.codehaus.jackson.annotate.JsonBackReference;
 
 import javax.persistence.*;
 
@@ -34,10 +35,12 @@ public class Address {
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "Customer_ID")
+    @JsonBackReference
     private Customer customer;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "Seller_ID")
+    @JsonBackReference
     private Seller seller;
 
 }

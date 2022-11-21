@@ -2,6 +2,8 @@ package com.Ecomm.Ecommerce.entities;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.codehaus.jackson.annotate.JsonBackReference;
+import org.codehaus.jackson.annotate.JsonManagedReference;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -23,9 +25,11 @@ public class Customer {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "User_Id")
+    @JsonBackReference
     private User user;
 
     @OneToMany(mappedBy = "customer",cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<Address> addresses = new ArrayList<>();
 
 }

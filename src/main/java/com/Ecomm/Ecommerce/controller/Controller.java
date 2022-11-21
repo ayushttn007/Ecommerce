@@ -6,11 +6,13 @@ import com.Ecomm.Ecommerce.entities.Seller;
 import com.Ecomm.Ecommerce.repository.UserRepo;
 import com.Ecomm.Ecommerce.service.UserAccountService;
 import com.Ecomm.Ecommerce.service.impl.EmailServiceImpl;
+import com.Ecomm.Ecommerce.service.impl.UserAccountServiceImpl;
 import com.Ecomm.Ecommerce.service.impl.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.mail.MessagingException;
@@ -30,7 +32,7 @@ UserServiceImpl userService;
 EmailServiceImpl emailService;
 
 @Autowired
-    UserAccountService userAccountService;
+UserAccountServiceImpl userAccountService;
 
 
     @GetMapping(value = "/")
@@ -112,5 +114,7 @@ EmailServiceImpl emailService;
         String responseMessage = emailService.resetPasswordEmail(token,userPassword,userConfirmPassword);
         return new ResponseEntity<>(responseMessage,HttpStatus.ACCEPTED);
     }
+
+
 
 }

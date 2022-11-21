@@ -2,6 +2,8 @@ package com.Ecomm.Ecommerce.entities;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.codehaus.jackson.annotate.JsonBackReference;
+import org.codehaus.jackson.annotate.JsonManagedReference;
 
 import javax.persistence.*;
 
@@ -27,8 +29,10 @@ public class Seller {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "User_Id")
+    @JsonBackReference
     private User user;
 
     @OneToOne(mappedBy = "seller",cascade = CascadeType.ALL)
+    @JsonManagedReference
     private Address address;
 }
