@@ -6,6 +6,7 @@ import com.Ecomm.Ecommerce.repository.VerificationTokenRepository;
 import com.Ecomm.Ecommerce.service.UserAccountService;
 import com.Ecomm.Ecommerce.entities.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Locale;
 
 @Service
 @Transactional
@@ -28,6 +30,9 @@ public class UserAccountServiceImpl implements UserAccountService {
 
    @Autowired
     EmailServiceImpl emailService;
+
+   @Autowired
+    MessageSource messageSource;
 
    @Autowired
     VerificationTokenRepository verificationTokenRepository;
@@ -49,18 +54,24 @@ public class UserAccountServiceImpl implements UserAccountService {
                 tokenStore.removeRefreshToken(refreshToken);
             }
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Invalid access token");
+            return ResponseEntity.badRequest().body(
+                   messageSource.getMessage("api.error.InvalidAccessToken",null, Locale.ENGLISH)
+            );
         }
 
 
-        return ResponseEntity.ok().body("Logout successfully");
+        return ResponseEntity.ok().body(
+                messageSource.getMessage("api.response.logOut",null,Locale.ENGLISH)
+        );
     }
 
 
     public String userForgotPassword(String email){
         User user = userRepo.findByEmail(email);
         if(user == null){
-            throw new BadCredentialsException("Invalid Email");
+            throw new BadCredentialsException(
+                    messageSource.getMessage("api.error.userNotFound",null,Locale.ENGLISH)
+            );
         }else{
             if(user.isActive()){
                 VerificationToken verificationToken = verificationTokenRepository.findByUser(user);
@@ -73,10 +84,12 @@ public class UserAccountServiceImpl implements UserAccountService {
                     emailService.sendEmailForgotPassword(user);
                 }
             }else{
-                throw new AccountNotActive("Account Associated with the given email is not Active");
+                throw new AccountNotActive(
+                        messageSource.getMessage("api.error.accountNotActive",null,Locale.ENGLISH)
+                );
             }
         }
-        return "Please check your email.An email has been sent to the given email";
+        return messageSource.getMessage("api.response.checkMailForgotPassword",null,Locale.ENGLISH);
     }
 
 }

@@ -15,34 +15,45 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.awt.print.Book;
 import java.beans.PropertyDescriptor;
+import java.util.Date;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 @Service
 @Transactional
 public class SellerServiceImpl implements SellerService {
 
-    @Autowired UserRepo userRepo;
+    @Autowired
+    UserRepo userRepo;
 
     @Autowired
     SellerRepo sellerRepo;
+    @Autowired
+    MessageSource messageSource;
+
 
     @Autowired EmailServiceImpl emailService;
     public SellerProfileDao getSellerProfile(String userEmail) {
         User user = userRepo.findByEmail(userEmail);
 
         if(user == null) {
-            throw new UserNotFoundException("User does not exists");
+            throw new UserNotFoundException(
+                    messageSource.getMessage("api.error.userNotFound",null,Locale.ENGLISH)
+            );
         }
         Seller seller = sellerRepo.findByUser(user);
         if(seller == null){
-            throw new UserNotFoundException("User does not exists");
+            throw new UserNotFoundException(
+                    messageSource.getMessage("api.error.userNotFound",null,Locale.ENGLISH)
+            );
         }
         SellerProfileDao sellerProfile  = new SellerProfileDao();
 
@@ -83,7 +94,7 @@ public class SellerServiceImpl implements SellerService {
 
         userRepo.save(user);
         sellerRepo.save(seller);
-        return "Profile update successfully.";
+        return messageSource.getMessage("api.response.passwordChanged",null,Locale.ENGLISH);
     }
 
 
@@ -93,15 +104,18 @@ public class SellerServiceImpl implements SellerService {
         //check old password with new one.
         //BONUS FEATURE
          if(!(user.getPassword().equals(sellerPasswordDao.getOldPassword()))){
-             throw new PasswordNotMatchedException("password not matched.");
+             throw new PasswordNotMatchedException(
+                     messageSource.getMessage("api.error.passwordNotMatched",null, Locale.ENGLISH)
+             );
          }
 
         BeanUtils.copyProperties(sellerPasswordDao, user, getNullPropertyNames(sellerPasswordDao));
         BeanUtils.copyProperties(sellerPasswordDao, seller, getNullPropertyNames(sellerPasswordDao));
 
+        user.setPasswordUpdateDate(new Date());
         userRepo.save(user);
         sellerRepo.save(seller);
         emailService.sendPasswordChangeMail(user);
-        return "Password update successfully.";
+        return messageSource.getMessage("api.response.passwordChanged",null,Locale.ENGLISH);
     }
 }

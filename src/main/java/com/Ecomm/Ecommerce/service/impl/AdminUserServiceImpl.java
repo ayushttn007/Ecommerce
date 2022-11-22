@@ -12,6 +12,7 @@ import com.Ecomm.Ecommerce.repository.UserRepo;
 import com.Ecomm.Ecommerce.service.AdminUserService;
 import net.bytebuddy.implementation.auxiliary.AuxiliaryType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 @Transactional
@@ -35,6 +37,9 @@ public class AdminUserServiceImpl implements AdminUserService {
 
      @Autowired
      EmailServiceImpl emailService;
+
+     @Autowired
+    MessageSource messageSource;
     public List<CustomerDao> getRegisterCustomers(){
         List<Customer> customersList = customerRepo.findAll();
         List<CustomerDao> customerDaoList =  new ArrayList<>();
@@ -79,27 +84,31 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     public String activateUser(Long userId) {
         User user = userRepo.findById(userId).orElseThrow(()->
-                 new UserNotFoundException("User does not exists")
+                 new UserNotFoundException(
+                         messageSource.getMessage("api.error.userNotFoundById",null, Locale.ENGLISH)
+                 )
         );
 
-        if(user.isActive()) return "user is Already Active";
+        if(user.isActive()) return messageSource.getMessage("api.response.user.AccountVerified",null,Locale.ENGLISH);
         user.setActive(true);
         userRepo.save(user);
         emailService.sendUserActiveMail(user);
-        return "User active successfully";
+        return messageSource.getMessage("api.response.accountActivate",null,Locale.ENGLISH);
     }
 
 
     public String deActivateUser(Long userId) {
         User user = userRepo.findById(userId).orElseThrow(()->
-                new UsernameNotFoundException("User does not exists")
+                new UsernameNotFoundException(
+                        messageSource.getMessage("api.error.userNotFoundById",null, Locale.ENGLISH)
+                )
         );
 
-        if(!(user.isActive())) return "user is Already inActive";
+        if(!(user.isActive())) return messageSource.getMessage("api.response.accountAlreadyActive",null,Locale.ENGLISH);
         user.setActive(false);
         userRepo.save(user);
         emailService.sendUserDeactivedMail(user);
-        return "User Deactivated successfully";
+        return messageSource.getMessage("api.response.accountDeactivated",null,Locale.ENGLISH);
     }
 
 

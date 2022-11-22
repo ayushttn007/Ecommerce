@@ -7,11 +7,15 @@ import com.Ecomm.Ecommerce.handler.PasswordNotMatchedException;
 import com.Ecomm.Ecommerce.handler.UserAlreadyExistsException;
 import com.Ecomm.Ecommerce.repository.*;
 import com.Ecomm.Ecommerce.service.UserService;
+import org.apache.logging.log4j.message.Message;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Locale;
 
 @Service
 @Transactional
@@ -35,6 +39,8 @@ public class UserServiceImpl implements UserService {
     @Autowired
     EmailServiceImpl emailService;
 
+    @Autowired
+    MessageSource messageSource;
 
 
 @Autowired
@@ -53,11 +59,15 @@ public class UserServiceImpl implements UserService {
         String userEmail = customerDto.getEmail();
         User userExists =   userRepo.findByEmail(userEmail);
         if(userExists!= null){
-            throw new UserAlreadyExistsException("An account is already registered with given email");
+            throw new UserAlreadyExistsException(
+                   messageSource.getMessage("api.error.accountExist",null,Locale.ENGLISH)
+            );
         }
         user.setEmail(userEmail);
         if(!(customerDto.getPassword().equals(customerDto.getConfirmPassword()))){
-            throw new PasswordNotMatchedException("Passwords do not Match");
+            throw new PasswordNotMatchedException(
+                    messageSource.getMessage("api.error.passwordNotMatched",null, Locale.ENGLISH)
+            );
         }
         user.setPassword(passwordEncoder.encode(customerDto.getConfirmPassword()));
         user.setRole(newRole);
@@ -109,11 +119,14 @@ public class UserServiceImpl implements UserService {
         String userEmail = sellerDto.getEmail();
         User userExists =   userRepo.findByEmail(userEmail);
         if(userExists!= null){
-            throw new UserAlreadyExistsException("An account is already registered with given email");
+            throw new UserAlreadyExistsException(
+                    messageSource.getMessage("api.error.accountExist",null,Locale.ENGLISH)
+            );
         }
 
         user.setEmail(userEmail);
-        user.setPassword(sellerDto.getPassword());
+        String encodePassword = passwordEncoder.encode(sellerDto.getPassword());
+        user.setPassword(encodePassword);
         user.setRole(newRole);
 
         // create new seller

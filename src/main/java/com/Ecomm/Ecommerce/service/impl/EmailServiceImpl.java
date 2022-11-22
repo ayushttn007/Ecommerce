@@ -5,9 +5,13 @@ import com.Ecomm.Ecommerce.entities.User;
 import com.Ecomm.Ecommerce.entities.VerificationToken;
 import com.Ecomm.Ecommerce.handler.InvalidTokenException;
 import com.Ecomm.Ecommerce.handler.PasswordNotMatchedException;
+import com.Ecomm.Ecommerce.handler.UserNotFoundException;
 import com.Ecomm.Ecommerce.repository.UserRepo;
 import com.Ecomm.Ecommerce.repository.VerificationTokenRepository;
 import com.Ecomm.Ecommerce.service.EmailService;
+import net.bytebuddy.asm.Advice;
+import org.springframework.cglib.core.Local;
+import org.springframework.context.MessageSource;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -15,18 +19,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
-import java.io.UnsupportedEncodingException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 
 @Service
@@ -39,6 +38,9 @@ public class EmailServiceImpl implements EmailService {
     UserRepo userRepo;
     @Autowired
     VerificationTokenRepository verificationTokenRepo;
+
+    @Autowired
+    MessageSource messageSource;
     private final JavaMailSender javaMailSender;
     @Value("${spring.mail.username}")
     private String fromEmail;
@@ -54,7 +56,6 @@ public class EmailServiceImpl implements EmailService {
         logger.info("SendEmail Executed");
         String toEmail = user.getEmail();
         String senderEmail = fromEmail;
-        String senderName = "Ecommerce Application";
         String subject = subjectMessage;
         SimpleMailMessage  message = new SimpleMailMessage();
         message.setFrom(senderEmail);
@@ -73,13 +74,17 @@ public class EmailServiceImpl implements EmailService {
         VerificationToken verificationToken = verificationTokenRepo.findByVerificationToken(token);
         // check if verificationToken not exists
         if (verificationToken == null) {
-            return "Invalid Token";
+            throw new InvalidTokenException(
+                    messageSource.getMessage("api.error.InvalidToken",null,Locale.ENGLISH)
+            );
         }
         User user = userRepo.findByEmail(verificationToken.getUser().getEmail());
         if (user == null) {
-            return "Invalid Token";
+            throw new InvalidTokenException(
+                  messageSource.getMessage("api.error.InvalidToken",null,Locale.ENGLISH)
+            );
         } else if (user.isActive()) {
-            return "Account is Already Verified";
+            return messageSource.getMessage("api.response.user.AccountVerified",null,Locale.ENGLISH);
         } else {
             Calendar calendar = Calendar.getInstance();
             if (verificationToken.getExpiryDate().getTime() - calendar.getTime().getTime() <= 0) {
@@ -87,12 +92,12 @@ public class EmailServiceImpl implements EmailService {
                 verificationTokenRepo.delete(verificationToken);
                 logger.info(SiteUrl);  // for debuging purpose
                 sendEmailCustomer(newUser,SiteUrl);
-                return "Verification link is Expired.Please check your mail new Verification link has been sent to your email ";
+                return messageSource.getMessage("api.response.verifyVerificationToken.isExpired",null,Locale.ENGLISH);
             }
             user.setActive(true);
             userRepo.save(user);
             verificationTokenRepo.delete(verificationToken);
-            return "Congratulations, your account has been verified.";
+            return messageSource.getMessage("api.response.accountVerified",null,Locale.ENGLISH);
         }
 
     }
@@ -108,14 +113,15 @@ public class EmailServiceImpl implements EmailService {
         User user = userRepo.findByEmail(userEmail);
         // check if user exists
         if (user == null) {
-            return "Account does not exists";
+            throw new UserNotFoundException(
+                    messageSource.getMessage("api.error.userNotFound",null,Locale.ENGLISH)
+            );
         }
         // check is user account is already active
         else if (user.isActive()) {
-            return "your account is Already Verified";
+            return messageSource.getMessage("api.response.user.AccountVerified",null,Locale.ENGLISH);
         } else {
             VerificationToken token = verificationTokenRepo.findByUser(user);
-
             // delete token if already exists
             if (token != null) {
                 verificationTokenRepo.delete(token);
@@ -126,7 +132,7 @@ public class EmailServiceImpl implements EmailService {
                 sendEmailCustomer(user, siteUrl);
             }
         }
-        return "Check your mail for Account Verification link";
+        return messageSource.getMessage("api.response.checkMail",null,Locale.ENGLISH);
     }
 
    // Method to verify token & give next steps to reset password
@@ -135,17 +141,24 @@ public class EmailServiceImpl implements EmailService {
         VerificationToken verificationToken = verificationTokenRepo.findByVerificationToken(token);
         // check
         if(verificationToken == null){
-            throw new InvalidTokenException("Given Token is invalid");
+            throw new InvalidTokenException(
+                    messageSource.getMessage("api.error.InvalidToken",null,Locale.ENGLISH)
+            );
         }
         else{
             User user = userRepo.findByEmail(verificationToken.getUser().getEmail());
             Calendar calendar = Calendar.getInstance();
             if(verificationToken.getExpiryDate().getTime() - calendar.getTime().getTime() <= 0){
                 verificationTokenRepo.delete(verificationToken);
-                throw new InvalidTokenException("Token has been expired");
+                throw new InvalidTokenException(
+                        messageSource.getMessage("api.error.tokenExpired",null,Locale.ENGLISH)
+                );
             }else{
                 if(!(userPassword.equals(userConfirmPassword))){
-                    throw new PasswordNotMatchedException("Password do not Matched");
+                    throw new PasswordNotMatchedException(
+                            messageSource.getMessage("api.error.passwordNotMatched",null,Locale.ENGLISH)
+                    );
+
                 }
                 String userEncodePassword = passwordEncoder.encode(userConfirmPassword);
                 user.setPassword(userEncodePassword);
@@ -153,7 +166,7 @@ public class EmailServiceImpl implements EmailService {
                 userRepo.save(user);
                 verificationTokenRepo.delete(verificationToken);
                 sendPasswordChangeMail(user);
-                return "Password Changed Successfully";
+                return messageSource.getMessage("api.response.passwordChanged",null,Locale.ENGLISH);
             }
 
         }
@@ -162,12 +175,8 @@ public class EmailServiceImpl implements EmailService {
 
     public void sendEmailSeller(User user){
         logger.info("SendEmailSeller Executed");
-        String  message = "Dear [[name]]"
-                + "Congratulations, Your account has been Created and Waiting for Approval."
-                + "Thank you."
-                + "Ecommerce Application.";
-
-        String subject = "WAITING FOR APPROVAL";
+        String  message = messageSource.getMessage("api.response.seller.Register",null,Locale.ENGLISH);
+        String subject = messageSource.getMessage("api.response.seller.Register.subject",null,Locale.ENGLISH);
         message = message.replace("[[name]]", user.getFirstName());
         sendEmail(user,message,subject);
 
@@ -177,13 +186,8 @@ public class EmailServiceImpl implements EmailService {
         logger.info("SendEmailCustomer Executed");
         VerificationToken verificationToken = new VerificationToken(user);
         verificationTokenRepo.save(verificationToken);
-        String emailMessage = "Dear [[name]], <br>"
-                + "Please click the link below to verify your registration." +
-                "This link is valid only for 15 minutes." + "\n\n"
-                + "[[URL]]" + "\n\n"
-                + "Regards"
-                + "Ecommerce Application.";
-        String subject = "VERIFY YOUR ACCOUNT";
+        String emailMessage = messageSource.getMessage("api.response.user.userRegister",null,Locale.ENGLISH);
+        String subject = messageSource.getMessage("api.response.user.userVerifyAccount.subject",null,Locale.ENGLISH);
         String verifyURL = siteUrl + "/confirm?token=" + (verificationToken.getVerificationToken());
         emailMessage = emailMessage.replace("[[name]]", user.getFirstName());
         emailMessage = emailMessage.replace("[[URL]]", verifyURL);
@@ -196,14 +200,9 @@ public class EmailServiceImpl implements EmailService {
         logger.info("sendEmailForgetPassword Executed");
         VerificationToken verificationToken = new VerificationToken(user);
         verificationTokenRepo.save(verificationToken);
-        String emailMessage = "Dear [[name]]"+ "\n" +
-                "We have received a request to Reset your password." +"\n"
-                + "Please click on the following link, (or paste this in your browser) to complete the process within five minutes of receiving it"+"\n\n"
-                +"[[URL]]"+ "\n\n"
-                +"Regards,\n" +
-                "Ecommerce Application";
-        String subject = "FORGOT PASSWORD REQUEST";
-        String verifyURL = "localhost:8080" + "/reset_password?token=" + (verificationToken.getVerificationToken());
+        String emailMessage = messageSource.getMessage("api.response.user.userForgotPassword",null,Locale.ENGLISH);
+        String subject = messageSource.getMessage("api.response.user.userForgotPassword.subject",null,Locale.ENGLISH);
+        String verifyURL = messageSource.getMessage("api.response.user.resetPasswordVerifyUrl",null,Locale.ENGLISH) + (verificationToken.getVerificationToken());
         emailMessage = emailMessage.replace("[[name]]", user.getFirstName());
         emailMessage = emailMessage.replace("[[URL]]", verifyURL);
         sendEmail(user,emailMessage,subject);
@@ -211,31 +210,22 @@ public class EmailServiceImpl implements EmailService {
 
     // Method to send successful password change mail.
     public void sendPasswordChangeMail(User user) {
-        String  message = "Dear [[name]]"
-                +"\n\n"+ "Congratulations, Your Password Changed Successfully."
-                +"\n\n"+ "Regards."+"\n"
-                + "Ecommerce Application.";
-        String subject = "PASSWORD CHANGED SUCCESSFULLY";
+        String message = messageSource.getMessage("api.response.user.passwordUpdate.successful",null, Locale.CHINA);
+        String subject = messageSource.getMessage("api.response.user.passwordUpdate.subject",null,Locale.ENGLISH);
         message = message.replace("[[name]]", user.getFirstName());
         sendEmail(user,message,subject);
     }
 
     public void sendUserActiveMail(User user) {
-        String  message = "Dear [[name]]"
-                +"\n\n"+ "Congratulations, Your account is Activated."
-                +"\n\n"+ "Regards."+"\n"
-                + "Ecommerce Application.";
-        String subject = "ACCOUNT ACTIVATED";
+        String  message = messageSource.getMessage("api.response.user.userActive.successful",null, Locale.ENGLISH);
+        String subject = messageSource.getMessage("api.response.user.userActive.subject",null, Locale.ENGLISH);
         message = message.replace("[[name]]", user.getFirstName());
         sendEmail(user,message,subject);
     }
 
     public void sendUserDeactivedMail(User user) {
-        String  message = "Dear [[name]]"
-                +"\n\n"+ "Your account is DeActivated."
-                +"\n\n"+ "Regards."+"\n"
-                + "Ecommerce Application.";
-        String subject = "ACCOUNT DEACTIVATED";
+        String  message = messageSource.getMessage("api.response.user.userDeActive",null,Locale.ENGLISH);
+        String subject = messageSource.getMessage("api.response.user.userDeActive.subject",null,Locale.ENGLISH);
         message = message.replace("[[name]]", user.getFirstName());
         sendEmail(user,message,subject);
     }

@@ -35,7 +35,8 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
                         "/confirm",
                         "/api/resend_token",
                         "/forgot_password",
-                        "/reset_password").permitAll()
+                        "/reset_password",
+                        "/swagger-ui.html").permitAll()
 //                .antMatchers("/admin/customers").access("hasRole('ADMIN')")
                 .anyRequest().authenticated()
                 .and()
