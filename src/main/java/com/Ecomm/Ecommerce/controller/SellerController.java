@@ -2,6 +2,7 @@ package com.Ecomm.Ecommerce.controller;
 
 
 import com.Ecomm.Ecommerce.Dao.PasswordDao;
+import com.Ecomm.Ecommerce.Dao.SellerAddressDao;
 import com.Ecomm.Ecommerce.Dao.SellerDao;
 import com.Ecomm.Ecommerce.Dao.SellerProfileDao;
 import com.Ecomm.Ecommerce.service.impl.SellerServiceImpl;
@@ -50,7 +51,7 @@ public class SellerController {
 
     @PatchMapping("/seller/update_address")
     @PreAuthorize("hasAuthority('SELLER')")
-    public ResponseEntity<String> UpdateAddress(Authentication authentication,@RequestBody AddressDao sellerAddressDao){
+    public ResponseEntity<String> UpdateAddress(Authentication authentication,@RequestBody SellerAddressDao sellerAddressDao){
         String userEmail = authentication.getName();
         String responseMessage = sellerService.updateSellerAddress(userEmail,sellerAddressDao);
         return new ResponseEntity<>(responseMessage,HttpStatus.OK);

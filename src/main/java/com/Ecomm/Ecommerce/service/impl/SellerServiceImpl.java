@@ -1,13 +1,16 @@
 package com.Ecomm.Ecommerce.service.impl;
 
 import com.Ecomm.Ecommerce.Dao.PasswordDao;
+import com.Ecomm.Ecommerce.Dao.SellerAddressDao;
 import com.Ecomm.Ecommerce.Dao.SellerDao;
 import com.Ecomm.Ecommerce.Dao.SellerProfileDao;
 import com.Ecomm.Ecommerce.dto.UserDto;
+import com.Ecomm.Ecommerce.entities.Address;
 import com.Ecomm.Ecommerce.entities.Seller;
 import com.Ecomm.Ecommerce.entities.User;
 import com.Ecomm.Ecommerce.handler.PasswordNotMatchedException;
 import com.Ecomm.Ecommerce.handler.UserNotFoundException;
+import com.Ecomm.Ecommerce.repository.AddressRepo;
 import com.Ecomm.Ecommerce.repository.SellerRepo;
 import com.Ecomm.Ecommerce.repository.UserRepo;
 import com.Ecomm.Ecommerce.service.SellerService;
@@ -38,6 +41,9 @@ public class SellerServiceImpl implements SellerService {
     SellerRepo sellerRepo;
     @Autowired
     MessageSource messageSource;
+
+    @Autowired
+    AddressRepo addressRepo;
 
 
     @Autowired EmailServiceImpl emailService;
@@ -115,11 +121,24 @@ public class SellerServiceImpl implements SellerService {
         user.setPasswordUpdateDate(new Date());
         userRepo.save(user);
         sellerRepo.save(seller);
+        // BONUS FEATURE - SEND MAIL ON PASSWORD CHANGE
         emailService.sendPasswordChangeMail(user);
         return messageSource.getMessage("api.response.passwordChanged",null,Locale.ENGLISH);
     }
 
-    public String updateSellerAddress(String userEmail, AddressDao sellerAddressDao) {
-        
+    public String updateSellerAddress(String userEmail, SellerAddressDao sellerAddressDao) {
+        User user = userRepo.findByEmail(userEmail);
+
+        Address address = user.getSeller().getAddress();
+        Seller seller = user.getSeller();
+
+
+        BeanUtils.copyProperties(sellerAddressDao, seller, getNullPropertyNames(sellerAddressDao));
+        BeanUtils.copyProperties(sellerAddressDao, address, getNullPropertyNames(sellerAddressDao));
+//        seller.setAddress(address);
+//        addressRepo.save(address);
+//        sellerRepo.save(seller);
+        return messageSource.getMessage("api.response.addressChanged",null,Locale.ENGLISH);
+
     }
 }
