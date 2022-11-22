@@ -36,12 +36,12 @@ public class Address {
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "Customer_ID")
-    @JsonBackReference
+    @JsonBackReference(value = "customerAddress")
     private Customer customer;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "Seller_ID")
-    @JsonBackReference
+    @JsonBackReference(value = "sellerAddress")
     private Seller seller;
 
 }

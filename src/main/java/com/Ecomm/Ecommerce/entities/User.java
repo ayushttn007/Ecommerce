@@ -53,11 +53,11 @@ public class User {
     private Date passwordUpdateDate;
 
     @OneToOne(mappedBy = "user",cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @JsonManagedReference(value = "customer")
     private Customer customer;
 
     @OneToOne(mappedBy = "user",cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @JsonManagedReference(value = "seller")
     private Seller seller;
 
 //    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)

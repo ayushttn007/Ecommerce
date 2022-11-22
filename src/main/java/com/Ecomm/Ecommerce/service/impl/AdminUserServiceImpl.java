@@ -43,7 +43,7 @@ public class AdminUserServiceImpl implements AdminUserService {
                 {
                     User user  = customer.getUser();
                     CustomerDao customerDao = new CustomerDao();
-                    customerDao.setId(user.getId());
+                    customerDao.setUserid(user.getId());
                     customerDao.setFullName(user.getFirstName() + " " + user.getMiddleName() + " " + user.getLastName());
                     customerDao.setEmail(user.getEmail());
                     customerDao.set_active(user.isActive());
@@ -63,7 +63,7 @@ public class AdminUserServiceImpl implements AdminUserService {
                 {
                     User user  = seller.getUser();
                     SellerDao sellerDao = new SellerDao();
-                    sellerDao.setId(user.getId());
+                    sellerDao.setUserid(user.getId());
                     sellerDao.setFullName(user.getFirstName() + " " + user.getMiddleName() + " " + user.getLastName());
                     sellerDao.setEmail(user.getEmail());
                     sellerDao.set_active(user.isActive());

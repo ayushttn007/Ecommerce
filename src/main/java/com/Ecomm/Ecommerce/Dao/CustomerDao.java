@@ -13,7 +13,7 @@ import javax.validation.constraints.Size;
 @Setter
 
 public class CustomerDao {
-    private long id;
+    private long userid;
     private String fullName;
     private String email;
     private boolean is_active;

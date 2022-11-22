@@ -26,11 +26,11 @@ public class Customer {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "User_Id")
-    @JsonBackReference
+    @JsonBackReference(value = "customer")
     private User user;
 
     @OneToMany(mappedBy = "customer",cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @JsonManagedReference(value = "customerAddress")
     private List<Address> addresses = new ArrayList<>();
 
 }

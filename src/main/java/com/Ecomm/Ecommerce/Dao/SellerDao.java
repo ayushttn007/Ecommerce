@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SellerDao {
-    private long id;
+    private long userid;
     private String fullName;
     private String email;
     private boolean is_active;

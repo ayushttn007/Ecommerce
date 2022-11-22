@@ -1,6 +1,8 @@
 package com.Ecomm.Ecommerce.controller;
 
 
+import com.Ecomm.Ecommerce.Dao.PasswordDao;
+import com.Ecomm.Ecommerce.Dao.SellerDao;
 import com.Ecomm.Ecommerce.Dao.SellerProfileDao;
 import com.Ecomm.Ecommerce.service.impl.SellerServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -29,4 +32,19 @@ public class SellerController {
     }
 
 
+    @PatchMapping("/seller/update-profile")
+    @PreAuthorize("hasAuthority('SELLER')")
+    public ResponseEntity<String> UpdateProfile(Authentication authentication,@RequestBody SellerProfileDao sellerProfileDao){
+        String userEmail = authentication.getName();
+         String responseMessage = sellerService.updateSellerProfile(userEmail,sellerProfileDao);
+         return new ResponseEntity<>(responseMessage,HttpStatus.OK);
+    }
+
+    @PatchMapping("/seller/update-password")
+    @PreAuthorize("hasAuthority('SELLER')")
+    public ResponseEntity<String> UpdatePassword(Authentication authentication,@RequestBody PasswordDao sellerPasswordDao){
+        String userEmail = authentication.getName();
+        String responseMessage = sellerService.updateSellerPassword(userEmail,sellerPasswordDao);
+        return new ResponseEntity<>(responseMessage,HttpStatus.OK);
+    }
 }

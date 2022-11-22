@@ -1,16 +1,28 @@
 package com.Ecomm.Ecommerce.service.impl;
 
+import com.Ecomm.Ecommerce.Dao.PasswordDao;
+import com.Ecomm.Ecommerce.Dao.SellerDao;
 import com.Ecomm.Ecommerce.Dao.SellerProfileDao;
+import com.Ecomm.Ecommerce.dto.UserDto;
 import com.Ecomm.Ecommerce.entities.Seller;
 import com.Ecomm.Ecommerce.entities.User;
+import com.Ecomm.Ecommerce.handler.PasswordNotMatchedException;
 import com.Ecomm.Ecommerce.handler.UserNotFoundException;
 import com.Ecomm.Ecommerce.repository.SellerRepo;
 import com.Ecomm.Ecommerce.repository.UserRepo;
 import com.Ecomm.Ecommerce.service.SellerService;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.awt.print.Book;
+import java.beans.PropertyDescriptor;
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 @Transactional
@@ -20,6 +32,8 @@ public class SellerServiceImpl implements SellerService {
 
     @Autowired
     SellerRepo sellerRepo;
+
+    @Autowired EmailServiceImpl emailService;
     public SellerProfileDao getSellerProfile(String userEmail) {
         User user = userRepo.findByEmail(userEmail);
 
@@ -32,7 +46,6 @@ public class SellerServiceImpl implements SellerService {
         }
         SellerProfileDao sellerProfile  = new SellerProfileDao();
 
-        sellerProfile.setId(user.getId());
         sellerProfile.setFirstName(user.getFirstName());
         sellerProfile.setLastName(user.getLastName());
         sellerProfile.setEmail(user.getEmail());
@@ -47,4 +60,48 @@ public class SellerServiceImpl implements SellerService {
 
 
 
+
+    public static String[] getNullPropertyNames (Object source) {
+        final BeanWrapper src = new BeanWrapperImpl(source);
+        PropertyDescriptor[] pds = src.getPropertyDescriptors();
+
+        Set<String> emptyNames = new HashSet<>();
+        for(PropertyDescriptor pd : pds) {
+            Object srcValue = src.getPropertyValue(pd.getName());
+            if (srcValue == null) emptyNames.add(pd.getName());
+        }
+        return emptyNames.toArray(new String[0]);
+    }
+
+    public String updateSellerProfile(String userEmail, SellerProfileDao sellerProfileDao) {
+        User user = userRepo.findByEmail(userEmail);
+        Seller seller = user.getSeller();
+
+
+        BeanUtils.copyProperties(sellerProfileDao, user, getNullPropertyNames(sellerProfileDao));
+        BeanUtils.copyProperties(sellerProfileDao, seller, getNullPropertyNames(sellerProfileDao));
+
+        userRepo.save(user);
+        sellerRepo.save(seller);
+        return "Profile update successfully.";
+    }
+
+
+    public String updateSellerPassword(String userEmail, PasswordDao sellerPasswordDao) {
+        User user = userRepo.findByEmail(userEmail);
+        Seller seller = user.getSeller();
+        //check old password with new one.
+        //BONUS FEATURE
+         if(!(user.getPassword().equals(sellerPasswordDao.getOldPassword()))){
+             throw new PasswordNotMatchedException("password not matched.");
+         }
+
+        BeanUtils.copyProperties(sellerPasswordDao, user, getNullPropertyNames(sellerPasswordDao));
+        BeanUtils.copyProperties(sellerPasswordDao, seller, getNullPropertyNames(sellerPasswordDao));
+
+        userRepo.save(user);
+        sellerRepo.save(seller);
+        emailService.sendPasswordChangeMail(user);
+        return "Password update successfully.";
+    }
 }

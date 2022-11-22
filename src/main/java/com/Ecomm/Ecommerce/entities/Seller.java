@@ -29,10 +29,10 @@ public class Seller {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "User_Id")
-    @JsonBackReference
+    @JsonBackReference(value = "seller")
     private User user;
 
     @OneToOne(mappedBy = "seller",cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @JsonManagedReference(value = "sellerAddress")
     private Address address;
 }
