@@ -118,4 +118,8 @@ public class SellerServiceImpl implements SellerService {
         emailService.sendPasswordChangeMail(user);
         return messageSource.getMessage("api.response.passwordChanged",null,Locale.ENGLISH);
     }
+
+    public String updateSellerAddress(String userEmail, AddressDao sellerAddressDao) {
+        
+    }
 }

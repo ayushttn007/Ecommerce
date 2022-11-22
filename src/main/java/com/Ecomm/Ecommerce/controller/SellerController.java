@@ -47,4 +47,12 @@ public class SellerController {
         String responseMessage = sellerService.updateSellerPassword(userEmail,sellerPasswordDao);
         return new ResponseEntity<>(responseMessage,HttpStatus.OK);
     }
+
+    @PatchMapping("/seller/update_address")
+    @PreAuthorize("hasAuthority('SELLER')")
+    public ResponseEntity<String> UpdateAddress(Authentication authentication,@RequestBody AddressDao sellerAddressDao){
+        String userEmail = authentication.getName();
+        String responseMessage = sellerService.updateSellerAddress(userEmail,sellerAddressDao);
+        return new ResponseEntity<>(responseMessage,HttpStatus.OK);
+    }
 }
