@@ -5,6 +5,7 @@ import com.Ecomm.Ecommerce.Dao.SellerDao;
 import com.Ecomm.Ecommerce.entities.Customer;
 import com.Ecomm.Ecommerce.entities.Seller;
 import com.Ecomm.Ecommerce.entities.User;
+import com.Ecomm.Ecommerce.handler.UserNotFoundException;
 import com.Ecomm.Ecommerce.repository.CustomerRepo;
 import com.Ecomm.Ecommerce.repository.SellerRepo;
 import com.Ecomm.Ecommerce.repository.UserRepo;
@@ -78,7 +79,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     public String activateUser(Long userId) {
         User user = userRepo.findById(userId).orElseThrow(()->
-                 new UsernameNotFoundException("User does not exists")
+                 new UserNotFoundException("User does not exists")
         );
 
         if(user.isActive()) return "user is Already Active";
@@ -102,5 +103,4 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
 
-    
 }

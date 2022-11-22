@@ -75,4 +75,12 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorFormat, HttpStatus.NOT_FOUND);
 
     }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public final ResponseEntity<ErrorFormat> UserNotFoundExceptionHandler(UserNotFoundException ex, WebRequest request) throws UserNotFoundException {
+        ErrorFormat errorFormat = new ErrorFormat(LocalDateTime.now(), ex.getMessage(), request.getDescription(false),HttpStatus.NOT_FOUND);
+
+        return new ResponseEntity<>(errorFormat, HttpStatus.NOT_FOUND);
+
+    }
 }
