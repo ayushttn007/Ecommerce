@@ -37,7 +37,9 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
                         "/forgot_password",
                         "/reset_password",
                         "/admin/customers",
-                        "/admin/sellers").permitAll()
+                        "/admin/sellers",
+                        "/admin/activate/user",
+                        "/admin/de-activate/user").permitAll()
 //                .antMatchers("/admin/customers").access("hasRole('ADMIN')")
                 .antMatchers(("/customer/**")).access("hasRole('ROLE_CUSTOMER')")
                 .antMatchers(("/seller/**")).access("hasRole('ROLE_SELLER')")

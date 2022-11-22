@@ -65,53 +65,6 @@ public class EmailServiceImpl implements EmailService {
         javaMailSender.send(message);
     }
 
-    public void sendEmailSeller(User user){
-        logger.info("SendEmailSeller Executed");
-       String  message = "Dear [[name]]"
-               + "Congratulations, Your account has been Created and Waiting for Approval."
-               + "Thank you."
-               + "Ecommerce Application.";
-
-       String subject = "WAITING FOR APPROVAL";
-        message = message.replace("[[name]]", user.getFirstName());
-            sendEmail(user,message,subject);
-
-    }
-
-    public void sendEmailCustomer(User user,String siteUrl){
-        logger.info("SendEmailCustomer Executed");
-        VerificationToken verificationToken = new VerificationToken(user);
-        verificationTokenRepo.save(verificationToken);
-        String emailMessage = "Dear [[name]], <br>"
-                + "Please click the link below to verify your registration." +
-                "This link is valid only for 15 minutes." + "\n\n"
-                + "[[URL]]" + "\n\n"
-                + "Regards"
-                + "Ecommerce Application.";
-        String subject = "VERIFY YOUR ACCOUNT";
-        String verifyURL = siteUrl + "/confirm?token=" + (verificationToken.getVerificationToken());
-        emailMessage = emailMessage.replace("[[name]]", user.getFirstName());
-        emailMessage = emailMessage.replace("[[URL]]", verifyURL);
-        sendEmail(user,emailMessage,subject);
-
-    }
-
-    public void sendEmailForgotPassword(User user) {
-        logger.info("sendEmailForgetPassword Executed");
-        VerificationToken verificationToken = new VerificationToken(user);
-        verificationTokenRepo.save(verificationToken);
-        String emailMessage = "Dear [[name]]"+ "\n" +
-                "We have received a request to Reset your password." +"\n"
-                + "Please click on the following link, (or paste this in your browser) to complete the process within five minutes of receiving it"+"\n\n"
-                +"[[URL]]"+ "\n\n"
-                +"Regards,\n" +
-                "Ecommerce Application";
-        String subject = "FORGOT PASSWORD REQUEST";
-        String verifyURL = "localhost:8080" + "/reset_password?token=" + (verificationToken.getVerificationToken());
-        emailMessage = emailMessage.replace("[[name]]", user.getFirstName());
-        emailMessage = emailMessage.replace("[[URL]]", verifyURL);
-        sendEmail(user,emailMessage,subject);
-    }
 
     // Method to verify user email verification token
     public String verifyVerificationToken(String token, String SiteUrl){
@@ -206,6 +159,56 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
+
+    public void sendEmailSeller(User user){
+        logger.info("SendEmailSeller Executed");
+        String  message = "Dear [[name]]"
+                + "Congratulations, Your account has been Created and Waiting for Approval."
+                + "Thank you."
+                + "Ecommerce Application.";
+
+        String subject = "WAITING FOR APPROVAL";
+        message = message.replace("[[name]]", user.getFirstName());
+        sendEmail(user,message,subject);
+
+    }
+
+    public void sendEmailCustomer(User user,String siteUrl){
+        logger.info("SendEmailCustomer Executed");
+        VerificationToken verificationToken = new VerificationToken(user);
+        verificationTokenRepo.save(verificationToken);
+        String emailMessage = "Dear [[name]], <br>"
+                + "Please click the link below to verify your registration." +
+                "This link is valid only for 15 minutes." + "\n\n"
+                + "[[URL]]" + "\n\n"
+                + "Regards"
+                + "Ecommerce Application.";
+        String subject = "VERIFY YOUR ACCOUNT";
+        String verifyURL = siteUrl + "/confirm?token=" + (verificationToken.getVerificationToken());
+        emailMessage = emailMessage.replace("[[name]]", user.getFirstName());
+        emailMessage = emailMessage.replace("[[URL]]", verifyURL);
+        sendEmail(user,emailMessage,subject);
+
+    }
+
+
+    public void sendEmailForgotPassword(User user) {
+        logger.info("sendEmailForgetPassword Executed");
+        VerificationToken verificationToken = new VerificationToken(user);
+        verificationTokenRepo.save(verificationToken);
+        String emailMessage = "Dear [[name]]"+ "\n" +
+                "We have received a request to Reset your password." +"\n"
+                + "Please click on the following link, (or paste this in your browser) to complete the process within five minutes of receiving it"+"\n\n"
+                +"[[URL]]"+ "\n\n"
+                +"Regards,\n" +
+                "Ecommerce Application";
+        String subject = "FORGOT PASSWORD REQUEST";
+        String verifyURL = "localhost:8080" + "/reset_password?token=" + (verificationToken.getVerificationToken());
+        emailMessage = emailMessage.replace("[[name]]", user.getFirstName());
+        emailMessage = emailMessage.replace("[[URL]]", verifyURL);
+        sendEmail(user,emailMessage,subject);
+    }
+
     // Method to send successful password change mail.
     public void sendPasswordChangeMail(User user) {
         String  message = "Dear [[name]]"
@@ -213,6 +216,26 @@ public class EmailServiceImpl implements EmailService {
                 +"\n\n"+ "Regards."+"\n"
                 + "Ecommerce Application.";
         String subject = "PASSWORD CHANGED SUCCESSFULLY";
+        message = message.replace("[[name]]", user.getFirstName());
+        sendEmail(user,message,subject);
+    }
+
+    public void sendUserActiveMail(User user) {
+        String  message = "Dear [[name]]"
+                +"\n\n"+ "Congratulations, Your account is Activated."
+                +"\n\n"+ "Regards."+"\n"
+                + "Ecommerce Application.";
+        String subject = "ACCOUNT ACTIVATED";
+        message = message.replace("[[name]]", user.getFirstName());
+        sendEmail(user,message,subject);
+    }
+
+    public void sendUserDeactivedMail(User user) {
+        String  message = "Dear [[name]]"
+                +"\n\n"+ "Your account is DeActivated."
+                +"\n\n"+ "Regards."+"\n"
+                + "Ecommerce Application.";
+        String subject = "ACCOUNT DEACTIVATED";
         message = message.replace("[[name]]", user.getFirstName());
         sendEmail(user,message,subject);
     }

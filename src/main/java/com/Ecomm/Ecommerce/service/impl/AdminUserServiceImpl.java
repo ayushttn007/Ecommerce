@@ -7,10 +7,12 @@ import com.Ecomm.Ecommerce.entities.Seller;
 import com.Ecomm.Ecommerce.entities.User;
 import com.Ecomm.Ecommerce.repository.CustomerRepo;
 import com.Ecomm.Ecommerce.repository.SellerRepo;
+import com.Ecomm.Ecommerce.repository.UserRepo;
 import com.Ecomm.Ecommerce.service.AdminUserService;
 import net.bytebuddy.implementation.auxiliary.AuxiliaryType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +28,12 @@ public class AdminUserServiceImpl implements AdminUserService {
 
      @Autowired
     SellerRepo sellerRepo;
+
+     @Autowired
+    UserRepo userRepo;
+
+     @Autowired
+     EmailServiceImpl emailService;
     public List<CustomerDao> getRegisterCustomers(){
         List<Customer> customersList = customerRepo.findAll();
         List<CustomerDao> customerDaoList =  new ArrayList<>();
@@ -67,4 +75,32 @@ public class AdminUserServiceImpl implements AdminUserService {
 
         return sellerDaoList;
     }
+
+    public String activateUser(Long userId) {
+        User user = userRepo.findById(userId).orElseThrow(()->
+                 new UsernameNotFoundException("User does not exists")
+        );
+
+        if(user.isActive()) return "user is Already Active";
+        user.setActive(true);
+        userRepo.save(user);
+        emailService.sendUserActiveMail(user);
+        return "User active successfully";
+    }
+
+
+    public String deActivateUser(Long userId) {
+        User user = userRepo.findById(userId).orElseThrow(()->
+                new UsernameNotFoundException("User does not exists")
+        );
+
+        if(!(user.isActive())) return "user is Already inActive";
+        user.setActive(false);
+        userRepo.save(user);
+        emailService.sendUserDeactivedMail(user);
+        return "User Deactivated successfully";
+    }
+
+
+    
 }

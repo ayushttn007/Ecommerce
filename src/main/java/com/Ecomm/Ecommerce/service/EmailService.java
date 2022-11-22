@@ -22,5 +22,9 @@ public interface EmailService {
 
     public String regenerateToken(String userEmail, String siteUrl);
 
+    public void sendUserActiveMail(User user);
+
+    public void sendUserDeactivedMail(User user);
+
 
 }
