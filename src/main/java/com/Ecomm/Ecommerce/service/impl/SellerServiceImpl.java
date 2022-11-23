@@ -9,6 +9,7 @@ import com.Ecomm.Ecommerce.entities.Address;
 import com.Ecomm.Ecommerce.entities.Seller;
 import com.Ecomm.Ecommerce.entities.User;
 import com.Ecomm.Ecommerce.handler.PasswordNotMatchedException;
+import com.Ecomm.Ecommerce.handler.ResourceNotFoundException;
 import com.Ecomm.Ecommerce.handler.UserNotFoundException;
 import com.Ecomm.Ecommerce.repository.AddressRepo;
 import com.Ecomm.Ecommerce.repository.SellerRepo;
@@ -20,6 +21,7 @@ import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,6 +47,8 @@ public class SellerServiceImpl implements SellerService {
     @Autowired
     AddressRepo addressRepo;
 
+    @Autowired
+    BCryptPasswordEncoder passwordEncoder;
 
     @Autowired EmailServiceImpl emailService;
     public SellerProfileDao getSellerProfile(String userEmail) {
@@ -100,24 +104,26 @@ public class SellerServiceImpl implements SellerService {
 
         userRepo.save(user);
         sellerRepo.save(seller);
-        return messageSource.getMessage("api.response.passwordChanged",null,Locale.ENGLISH);
+        return messageSource.getMessage("api.response.profileUpdate",null,Locale.ENGLISH);
     }
 
 
     public String updateSellerPassword(String userEmail, PasswordDao sellerPasswordDao) {
         User user = userRepo.findByEmail(userEmail);
         Seller seller = user.getSeller();
-        //check old password with new one.
-        //BONUS FEATURE
-         if(!(user.getPassword().equals(sellerPasswordDao.getOldPassword()))){
-             throw new PasswordNotMatchedException(
-                     messageSource.getMessage("api.error.passwordNotMatched",null, Locale.ENGLISH)
-             );
-         }
+        String encodePassword = passwordEncoder.encode(sellerPasswordDao.getConfirmPassword());
 
-        BeanUtils.copyProperties(sellerPasswordDao, user, getNullPropertyNames(sellerPasswordDao));
-        BeanUtils.copyProperties(sellerPasswordDao, seller, getNullPropertyNames(sellerPasswordDao));
+        String userPassword = sellerPasswordDao.getPassword();
+        String userConfirmPassword = sellerPasswordDao.getConfirmPassword();
+        if(!(userPassword.equals(userConfirmPassword))) {
+            throw new PasswordNotMatchedException(
+                    messageSource.getMessage("api.error.passwordNotMatched",null, Locale.ENGLISH)
+            );
+        }
 
+//        BeanUtils.copyProperties(sellerPasswordDao, user, getNullPropertyNames(sellerPasswordDao));
+//        BeanUtils.copyProperties(sellerPasswordDao, seller, getNullPropertyNames(sellerPasswordDao));
+        user.setPassword(encodePassword);
         user.setPasswordUpdateDate(new Date());
         userRepo.save(user);
         sellerRepo.save(seller);
@@ -126,18 +132,16 @@ public class SellerServiceImpl implements SellerService {
         return messageSource.getMessage("api.response.passwordChanged",null,Locale.ENGLISH);
     }
 
-    public String updateSellerAddress(String userEmail, SellerAddressDao sellerAddressDao) {
-        User user = userRepo.findByEmail(userEmail);
+    public String updateSellerAddress(String userEmail, SellerAddressDao sellerAddressDao,long addressId) {
+        Address address = addressRepo.findById(addressId).orElseThrow(
+                () ->  new ResourceNotFoundException(
+                        messageSource.getMessage("api.error.addressNotFound",null,Locale.ENGLISH)
+                )
+        );
 
-        Address address = user.getSeller().getAddress();
-        Seller seller = user.getSeller();
 
-
-        BeanUtils.copyProperties(sellerAddressDao, seller, getNullPropertyNames(sellerAddressDao));
         BeanUtils.copyProperties(sellerAddressDao, address, getNullPropertyNames(sellerAddressDao));
-//        seller.setAddress(address);
-//        addressRepo.save(address);
-//        sellerRepo.save(seller);
+         addressRepo.save(address);
         return messageSource.getMessage("api.response.addressChanged",null,Locale.ENGLISH);
 
     }

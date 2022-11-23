@@ -11,10 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class SellerController {
@@ -51,9 +48,9 @@ public class SellerController {
 
     @PatchMapping("/seller/update_address")
     @PreAuthorize("hasAuthority('SELLER')")
-    public ResponseEntity<String> UpdateAddress(Authentication authentication,@RequestBody SellerAddressDao sellerAddressDao){
+    public ResponseEntity<String> UpdateAddress(Authentication authentication, @RequestParam long address_id, @RequestBody SellerAddressDao sellerAddressDao){
         String userEmail = authentication.getName();
-        String responseMessage = sellerService.updateSellerAddress(userEmail,sellerAddressDao);
+        String responseMessage = sellerService.updateSellerAddress(userEmail,sellerAddressDao,address_id);
         return new ResponseEntity<>(responseMessage,HttpStatus.OK);
     }
 }

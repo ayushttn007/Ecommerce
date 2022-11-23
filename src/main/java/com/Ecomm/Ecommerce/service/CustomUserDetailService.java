@@ -43,7 +43,7 @@ public class CustomUserDetailService implements UserDetailsService {
 
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
-                passwordEncoder.encode(user.getPassword()),
+                user.getPassword(),
                 true,
                 true,
                 true,
