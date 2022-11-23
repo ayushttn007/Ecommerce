@@ -33,7 +33,7 @@ public class AdminController {
     @Autowired private EntityLinks links;
 
     @Autowired
-    AdminUserServiceImpl adminUserService;
+    AdminUserService adminUserService;
 
     // Api to list all the register customers
     @GetMapping(path = "/admin/customers")

@@ -5,6 +5,7 @@ import com.Ecomm.Ecommerce.Dao.PasswordDao;
 import com.Ecomm.Ecommerce.Dao.SellerAddressDao;
 import com.Ecomm.Ecommerce.Dao.SellerDao;
 import com.Ecomm.Ecommerce.Dao.SellerProfileDao;
+import com.Ecomm.Ecommerce.service.SellerService;
 import com.Ecomm.Ecommerce.service.impl.SellerServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,7 +19,7 @@ public class SellerController {
 
 
     @Autowired
-    SellerServiceImpl sellerService;
+    SellerService sellerService;
 
     @GetMapping("/seller/profile")
     @PreAuthorize("hasAuthority('SELLER')")

@@ -11,17 +11,9 @@ import javax.validation.constraints.Pattern;
 public class SellerAddressDao {
 
     private String country;
-
-
     private String city;
-
-
     private String state;
-
-
     private String addressLine;
-
-
     private long zipCode;
     private String label;
 }

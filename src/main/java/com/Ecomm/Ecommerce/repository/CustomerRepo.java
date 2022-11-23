@@ -1,6 +1,8 @@
 package com.Ecomm.Ecommerce.repository;
 
 import com.Ecomm.Ecommerce.entities.Customer;
+import com.Ecomm.Ecommerce.entities.Seller;
+import com.Ecomm.Ecommerce.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,6 +16,8 @@ public interface CustomerRepo extends JpaRepository<Customer, Long> {
     public Customer findByUser_Id(@Param("userId") long userId);
 
     public Customer findByContact(String contact);
+
+    public Customer findByUser(User user);
 
 
 }

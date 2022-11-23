@@ -22,5 +22,4 @@ public class CustomerDto extends UserDto {
     @NotNull(message = "Contact number is mandatory field.")
     @Size(min=10,max=10,message = "Enter a valid Contact Number.")
     private String contact;
-    private List<AddressDto> address = new ArrayList<>();
 }

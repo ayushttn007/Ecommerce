@@ -4,7 +4,9 @@ package com.Ecomm.Ecommerce.controller;
 import com.Ecomm.Ecommerce.dto.*;
 import com.Ecomm.Ecommerce.entities.Seller;
 import com.Ecomm.Ecommerce.repository.UserRepo;
+import com.Ecomm.Ecommerce.service.EmailService;
 import com.Ecomm.Ecommerce.service.UserAccountService;
+import com.Ecomm.Ecommerce.service.UserService;
 import com.Ecomm.Ecommerce.service.impl.EmailServiceImpl;
 import com.Ecomm.Ecommerce.service.impl.UserAccountServiceImpl;
 import com.Ecomm.Ecommerce.service.impl.UserServiceImpl;
@@ -24,15 +26,15 @@ import java.io.UnsupportedEncodingException;
 public class Controller {
 
 @Autowired
-UserServiceImpl userService;
+UserService userService;
 
 @Autowired  UserRepo userRepo;
 
 @Autowired
-EmailServiceImpl emailService;
+EmailService emailService;
 
 @Autowired
-UserAccountServiceImpl userAccountService;
+UserAccountService userAccountService;
 
 
     @GetMapping(value = "/")
