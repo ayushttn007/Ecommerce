@@ -80,8 +80,6 @@ public class SellerServiceImpl implements SellerService {
     }
 
 
-
-
     public static String[] getNullPropertyNames (Object source) {
         final BeanWrapper src = new BeanWrapperImpl(source);
         PropertyDescriptor[] pds = src.getPropertyDescriptors();

@@ -9,7 +9,7 @@ import java.util.List;
 @Setter
 @Getter
 public class CustomerProfileDao {
-
+    private long userid;
     private String firstName;
     private String lastName;
     private String email;

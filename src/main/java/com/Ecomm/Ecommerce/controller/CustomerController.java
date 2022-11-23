@@ -1,6 +1,7 @@
 package com.Ecomm.Ecommerce.controller;
 
 import com.Ecomm.Ecommerce.Dao.CustomerProfileDao;
+import com.Ecomm.Ecommerce.Dao.PasswordDao;
 import com.Ecomm.Ecommerce.Dao.SellerAddressDao;
 import com.Ecomm.Ecommerce.Dao.SellerProfileDao;
 import com.Ecomm.Ecommerce.dto.AddressDto;
@@ -37,5 +38,19 @@ public class CustomerController {
         return new ResponseEntity<>(customerAddress,HttpStatus.OK);
     }
 
-    
+    @PatchMapping("/customer/update_profile")
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    public ResponseEntity<String> UpdateProfile(Authentication authentication,@RequestBody CustomerProfileDao customerProfileDao){
+        String userEmail = authentication.getName();
+        String responseMessage = customerService.updateProfile(userEmail,customerProfileDao);
+        return new ResponseEntity<>(responseMessage,HttpStatus.OK);
+    }
+
+    @PatchMapping("/customer/update_password")
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    public ResponseEntity<String> UpdatePassword(Authentication authentication,@RequestBody PasswordDao sellerPasswordDao){
+        String userEmail = authentication.getName();
+        String responseMessage = customerService.updatePassword(userEmail,sellerPasswordDao);
+        return new ResponseEntity<>(responseMessage,HttpStatus.OK);
+    }
 }
