@@ -92,22 +92,7 @@ public class CustomerServiceImpl implements CustomerService {
        Customer customer = customerRepo.findByUser(user);
 
        List<Address> customerAddresses = customer.getAddresses();
-//       List<Address> responseAddress = new ArrayList<>();
-//       customerAddresses.forEach((customerAddress) ->
-//                {
-//                   Address address = new Address();
-//                   address.setCountry(customerAddress.getCountry());
-//                   address.setCity(customerAddress.getCity());
-//                   address.setAddressLine(customerAddress.getAddressLine());
-//                   address.setZipCode(customerAddress.getZipCode());
-//                   address.setLabel(customerAddress.getLabel());
-//                   address.setState(customerAddress.getState());
-//
-//                   responseAddress.add(address);
-//                }
-//        );
        return customerAddresses;
-
 
    }
 
@@ -168,10 +153,26 @@ public class CustomerServiceImpl implements CustomerService {
                 )
         );
 
-
-        BeanUtils.copyProperties(customerAddressDao, address, getNullPropertyNames(customerAddressDao));
-        addressRepo.save(address);
-        return messageSource.getMessage("api.response.addressChanged",null,Locale.ENGLISH);
+        User user = userRepo.findByEmail(userEmail);
+        Customer customer = customerRepo.findByUser(user);
+        // throw exception
+        long customerid;
+        if(address.getCustomer()!= null){
+            customerid = address.getCustomer().getId();
+        }else{
+            throw  new ResourceNotFoundException(
+                    messageSource.getMessage("api.error.addressNotFound",null,Locale.ENGLISH)
+            );
+        }
+        if(customerid != customer.getId()){
+            throw new ResourceNotFoundException(
+                    messageSource.getMessage("api.error.addressNotFound",null,Locale.ENGLISH)
+            );
+        }else{
+            BeanUtils.copyProperties(customerAddressDao, address, getNullPropertyNames(customerAddressDao));
+            addressRepo.save(address);
+            return messageSource.getMessage("api.response.addressChanged",null,Locale.ENGLISH);
+        }
 
     }
 
@@ -220,7 +221,7 @@ public class CustomerServiceImpl implements CustomerService {
         address.setState(customerAddressDao.getState());
         address.setAddressLine(customerAddressDao.getAddressLine());
         address.setLabel(customerAddressDao.getLabel());
-        address.setZipCode(customerAddressDao.getZipCode());
+        address.setZipCode(customerAddressDao.getPinCode());
         address.setCustomer(customer);
 
         addressRepo.save(address);

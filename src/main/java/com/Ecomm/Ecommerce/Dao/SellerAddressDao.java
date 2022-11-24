@@ -14,6 +14,6 @@ public class SellerAddressDao {
     private String city;
     private String state;
     private String addressLine;
-    private long zipCode;
+    private long pinCode;
     private String label;
 }

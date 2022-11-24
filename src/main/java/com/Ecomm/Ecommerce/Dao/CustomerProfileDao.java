@@ -16,6 +16,4 @@ public class CustomerProfileDao {
     private boolean is_active;
     private  String contact;
 
-    private List<Address> addresses;
-
 }
