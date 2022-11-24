@@ -221,7 +221,7 @@ public class CustomerServiceImpl implements CustomerService {
         address.setState(customerAddressDao.getState());
         address.setAddressLine(customerAddressDao.getAddressLine());
         address.setLabel(customerAddressDao.getLabel());
-        address.setZipCode(customerAddressDao.getPinCode());
+        address.setZipCode(customerAddressDao.getZipCode());
         address.setCustomer(customer);
 
         addressRepo.save(address);

@@ -29,7 +29,7 @@ public class Address {
     private String addressLine;
 
     @Column(name = "Zip_Code")
-    private long zipCode;
+    private String zipCode;
 
     @Column(name = "Label")
     private String label;

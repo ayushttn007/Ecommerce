@@ -32,6 +32,6 @@ public class AddressDto {
 
     @NotEmpty(message = "Field is mandatory.")
     @Pattern(regexp = "^\\d{6}$", message = "Enter a valid six-digit pincode.")
-    private long zipCode;
+    private String zipCode;
     private String label;
 }
