@@ -34,7 +34,7 @@ public class Address {
     @Column(name = "Label")
     private String label;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "Customer_ID")
     @JsonBackReference(value = "customerAddress")
     private Customer customer;

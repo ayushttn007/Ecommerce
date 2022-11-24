@@ -32,9 +32,9 @@ public class CustomerController {
 
     @GetMapping("/customer/address")
     @PreAuthorize("hasAuthority('CUSTOMER')")
-    public ResponseEntity<List> UpdateAddress(Authentication authentication, @RequestBody SellerAddressDao customerAddressDao){
+    public ResponseEntity<List> getAddress(Authentication authentication){
         String userEmail = authentication.getName();
-        List<Address> customerAddress = customerService.getCustomerAddress(userEmail,customerAddressDao);
+        List<Address> customerAddress = customerService.getCustomerAddress(userEmail);
         return new ResponseEntity<>(customerAddress,HttpStatus.OK);
     }
 
@@ -53,4 +53,28 @@ public class CustomerController {
         String responseMessage = customerService.updatePassword(userEmail,sellerPasswordDao);
         return new ResponseEntity<>(responseMessage,HttpStatus.OK);
     }
+
+    @PatchMapping("/customer/update_address")
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    public  ResponseEntity<String> updateAddress(Authentication authentication,@RequestBody SellerAddressDao customerAddressDao,@RequestParam long addressid){
+        String userEmail = authentication.getName();
+        String responseMessage = customerService.updateAddress(userEmail,customerAddressDao,addressid);
+        return new ResponseEntity<>(responseMessage,HttpStatus.OK);
+    }
+    @DeleteMapping ("/customer/delete_address")
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    public ResponseEntity<String> deleteAddress(Authentication authentication,@RequestParam long address_id){
+        String userEmail = authentication.getName();
+        String responseMessage = customerService.deleteAddress(userEmail,address_id);
+        return new ResponseEntity<>(responseMessage,HttpStatus.OK);
+    }
+
+    @PostMapping("customer/add_address")
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    public ResponseEntity<String> addAddress(Authentication authentication,@RequestBody SellerAddressDao customerAddressDao){
+        String userEmail = authentication.getName();
+        String responseMessage = customerService.addAddress(userEmail,customerAddressDao);
+        return new ResponseEntity<>(responseMessage,HttpStatus.OK);
+    }
+
 }

@@ -9,11 +9,17 @@ import com.Ecomm.Ecommerce.entities.Address;
 import java.util.List;
 
 public interface CustomerService {
-    CustomerProfileDao getCustomerProfile(String userEmail);
+  public  CustomerProfileDao getCustomerProfile(String userEmail);
 
-    List<Address> getCustomerAddress(String userEmail, SellerAddressDao customerAddressDao);
+   public List<Address> getCustomerAddress(String userEmail);
 
-    String updateProfile(String userEmail, CustomerProfileDao customerProfileDao);
+    public String updateProfile(String userEmail, CustomerProfileDao customerProfileDao);
 
     public String updatePassword(String userEmail, PasswordDao sellerPasswordDao);
+
+    public String deleteAddress(String userEmail,long address_id);
+
+   public String updateAddress(String userEmail, SellerAddressDao customerAddressDao, long addressid);
+
+   public String addAddress(String userEmail, SellerAddressDao customerAddressDao);
 }
