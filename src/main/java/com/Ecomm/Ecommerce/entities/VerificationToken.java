@@ -1,5 +1,6 @@
 package com.Ecomm.Ecommerce.entities;
 
+import com.Ecomm.Ecommerce.utils.Auditable;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -10,7 +11,7 @@ import java.util.UUID;
 
 @Entity
 @Data
-public class VerificationToken {
+public class VerificationToken  extends Auditable<String> {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name="token_id")

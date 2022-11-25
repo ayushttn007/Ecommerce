@@ -1,5 +1,6 @@
 package com.Ecomm.Ecommerce.entities;
 
+import com.Ecomm.Ecommerce.utils.Auditable;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,7 +11,7 @@ import javax.persistence.*;
 @Entity
 @Getter
 @Setter
-public class Address {
+public class Address extends Auditable<String> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
