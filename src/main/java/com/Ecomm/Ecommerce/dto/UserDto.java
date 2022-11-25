@@ -42,6 +42,7 @@ public class UserDto implements Serializable {
                     "with at least 1 lower case, 1 upper case, 1 special character, and 1 Number.")
     private  String password;
 
+    @NotNull
     private String confirmPassword;
 
 

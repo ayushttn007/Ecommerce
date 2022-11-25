@@ -37,9 +37,6 @@ public class UserAccountServiceImpl implements UserAccountService {
    @Autowired
     VerificationTokenRepository verificationTokenRepository;
 
-    public String userLogin(String userEmail, String userPassword){
-           return "demostring";
-    }
     public ResponseEntity<String> userLogout(HttpServletRequest request){
         try {
             String authorization = request.getHeader("Authorization");

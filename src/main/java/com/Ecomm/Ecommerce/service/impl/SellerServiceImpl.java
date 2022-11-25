@@ -1,10 +1,6 @@
 package com.Ecomm.Ecommerce.service.impl;
 
-import com.Ecomm.Ecommerce.Dao.PasswordDao;
-import com.Ecomm.Ecommerce.Dao.SellerAddressDao;
-import com.Ecomm.Ecommerce.Dao.SellerDao;
-import com.Ecomm.Ecommerce.Dao.SellerProfileDao;
-import com.Ecomm.Ecommerce.dto.UserDto;
+import com.Ecomm.Ecommerce.Dao.*;
 import com.Ecomm.Ecommerce.entities.Address;
 import com.Ecomm.Ecommerce.entities.Seller;
 import com.Ecomm.Ecommerce.entities.User;
@@ -20,12 +16,10 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.awt.print.Book;
 import java.beans.PropertyDescriptor;
 import java.util.Date;
 import java.util.HashSet;
@@ -92,13 +86,13 @@ public class SellerServiceImpl implements SellerService {
         return emptyNames.toArray(new String[0]);
     }
 
-    public String updateSellerProfile(String userEmail, SellerProfileDao sellerProfileDao) {
+    public String updateSellerProfile(String userEmail, SellerUpdateDao sellerUpdateDao) {
         User user = userRepo.findByEmail(userEmail);
         Seller seller = user.getSeller();
 
 
-        BeanUtils.copyProperties(sellerProfileDao, user, getNullPropertyNames(sellerProfileDao));
-        BeanUtils.copyProperties(sellerProfileDao, seller, getNullPropertyNames(sellerProfileDao));
+        BeanUtils.copyProperties(sellerUpdateDao, user, getNullPropertyNames(sellerUpdateDao));
+        BeanUtils.copyProperties(sellerUpdateDao, seller, getNullPropertyNames(sellerUpdateDao));
 
         userRepo.save(user);
         sellerRepo.save(seller);
@@ -130,7 +124,7 @@ public class SellerServiceImpl implements SellerService {
         return messageSource.getMessage("api.response.passwordChanged",null,Locale.ENGLISH);
     }
 
-    public String updateSellerAddress(String userEmail, SellerAddressDao sellerAddressDao,long addressId) {
+    public String updateSellerAddress(String userEmail, AddressDao addressDao, long addressId) {
         Address address = addressRepo.findById(addressId).orElseThrow(
                 () ->  new ResourceNotFoundException(
                         messageSource.getMessage("api.error.addressNotFound",null,Locale.ENGLISH)
@@ -138,7 +132,7 @@ public class SellerServiceImpl implements SellerService {
         );
 
 
-        BeanUtils.copyProperties(sellerAddressDao, address, getNullPropertyNames(sellerAddressDao));
+        BeanUtils.copyProperties(addressDao, address, getNullPropertyNames(addressDao));
          addressRepo.save(address);
         return messageSource.getMessage("api.response.addressChanged",null,Locale.ENGLISH);
 

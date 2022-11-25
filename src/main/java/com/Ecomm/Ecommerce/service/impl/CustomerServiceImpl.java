@@ -3,11 +3,9 @@ package com.Ecomm.Ecommerce.service.impl;
 import com.Ecomm.Ecommerce.Dao.*;
 import com.Ecomm.Ecommerce.entities.Address;
 import com.Ecomm.Ecommerce.entities.Customer;
-import com.Ecomm.Ecommerce.entities.Seller;
 import com.Ecomm.Ecommerce.entities.User;
 import com.Ecomm.Ecommerce.handler.PasswordNotMatchedException;
 import com.Ecomm.Ecommerce.handler.ResourceNotFoundException;
-import com.Ecomm.Ecommerce.handler.UserNotFoundException;
 import com.Ecomm.Ecommerce.repository.AddressRepo;
 import com.Ecomm.Ecommerce.repository.CustomerRepo;
 import com.Ecomm.Ecommerce.repository.UserRepo;
@@ -18,7 +16,6 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -96,12 +93,12 @@ public class CustomerServiceImpl implements CustomerService {
 
    }
 
-    public String updateProfile(String userEmail, CustomerProfileDao customerProfileDao){
+    public String updateProfile(String userEmail, CustomerUpdateDao customerUpdateDao){
         User user = userRepo.findByEmail(userEmail);
         Customer customer = user.getCustomer();
 
-        BeanUtils.copyProperties(customerProfileDao, user, getNullPropertyNames(customerProfileDao));
-        BeanUtils.copyProperties(customerProfileDao, customer, getNullPropertyNames(customerProfileDao));
+        BeanUtils.copyProperties(customerUpdateDao, user, getNullPropertyNames(customerUpdateDao));
+        BeanUtils.copyProperties(customerUpdateDao, customer, getNullPropertyNames(customerUpdateDao));
 
         userRepo.save(user);
         customerRepo.save(customer);
@@ -121,13 +118,13 @@ public class CustomerServiceImpl implements CustomerService {
         return emptyNames.toArray(new String[0]);
     }
 
-    public String updatePassword(String userEmail, PasswordDao sellerPasswordDao) {
+    public String updatePassword(String userEmail, PasswordDao customerPasswordDao) {
         User user = userRepo.findByEmail(userEmail);
         Customer customer = user.getCustomer();
-        String encodePassword = passwordEncoder.encode(sellerPasswordDao.getConfirmPassword());
+        String encodePassword = passwordEncoder.encode(customerPasswordDao.getConfirmPassword());
 
-        String userPassword = sellerPasswordDao.getPassword();
-        String userConfirmPassword = sellerPasswordDao.getConfirmPassword();
+        String userPassword = customerPasswordDao.getPassword();
+        String userConfirmPassword = customerPasswordDao.getConfirmPassword();
         if(!(userPassword.equals(userConfirmPassword))) {
             throw new PasswordNotMatchedException(
                     messageSource.getMessage("api.error.passwordNotMatched",null, Locale.ENGLISH)
@@ -146,7 +143,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
 
-    public String updateAddress(String userEmail, SellerAddressDao customerAddressDao,long addressId) {
+    public String updateAddress(String userEmail, AddressDao customerAddressDao, long addressId) {
         Address address = addressRepo.findById(addressId).orElseThrow(
                 () ->  new ResourceNotFoundException(
                         messageSource.getMessage("api.error.addressNotFound",null,Locale.ENGLISH)
@@ -208,7 +205,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
     }
 
-    public String addAddress(String userEmail,SellerAddressDao customerAddressDao){
+    public String addAddress(String userEmail, AddressDao customerAddressDao){
         User user = userRepo.findByEmail(userEmail);
         Customer customer = customerRepo.findByUser(user);
 

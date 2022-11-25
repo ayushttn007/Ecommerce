@@ -91,15 +91,6 @@ UserAccountService userAccountService;
        return userAccountService.userLogout(request);
     }
 
-    // api for login user
-
-    @PostMapping(path = "/login")
-    public ResponseEntity<String> login(@RequestBody LoginDto loginDto){
-        String userEmail = loginDto.getEmail();
-        String userPassword = loginDto.getPassword();
-       String responseMessage =  userAccountService.userLogin(userEmail, userPassword);
-        return new ResponseEntity<>(responseMessage, HttpStatus.OK);
-    }
 
     @PostMapping(path="/forgot_password")
     public ResponseEntity<String> forgotPassword(@Valid @RequestBody EmailDto emailDtO){

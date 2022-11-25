@@ -1,12 +1,8 @@
 package com.Ecomm.Ecommerce.controller;
 
 
-import com.Ecomm.Ecommerce.Dao.PasswordDao;
-import com.Ecomm.Ecommerce.Dao.SellerAddressDao;
-import com.Ecomm.Ecommerce.Dao.SellerDao;
-import com.Ecomm.Ecommerce.Dao.SellerProfileDao;
+import com.Ecomm.Ecommerce.Dao.*;
 import com.Ecomm.Ecommerce.service.SellerService;
-import com.Ecomm.Ecommerce.service.impl.SellerServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,9 +29,9 @@ public class SellerController {
 
     @PatchMapping("/seller/update-profile")
     @PreAuthorize("hasAuthority('SELLER')")
-    public ResponseEntity<String> UpdateProfile(Authentication authentication,@RequestBody SellerProfileDao sellerProfileDao){
+    public ResponseEntity<String> UpdateProfile(Authentication authentication,@RequestBody SellerUpdateDao sellerUpdateDao){
         String userEmail = authentication.getName();
-         String responseMessage = sellerService.updateSellerProfile(userEmail,sellerProfileDao);
+         String responseMessage = sellerService.updateSellerProfile(userEmail,sellerUpdateDao);
          return new ResponseEntity<>(responseMessage,HttpStatus.OK);
     }
 
@@ -49,9 +45,9 @@ public class SellerController {
 
     @PatchMapping("/seller/update_address")
     @PreAuthorize("hasAuthority('SELLER')")
-    public ResponseEntity<String> UpdateAddress(Authentication authentication, @RequestParam long address_id, @RequestBody SellerAddressDao sellerAddressDao){
+    public ResponseEntity<String> UpdateAddress(Authentication authentication, @RequestParam long address_id, @RequestBody AddressDao addressDao){
         String userEmail = authentication.getName();
-        String responseMessage = sellerService.updateSellerAddress(userEmail,sellerAddressDao,address_id);
+        String responseMessage = sellerService.updateSellerAddress(userEmail, addressDao,address_id);
         return new ResponseEntity<>(responseMessage,HttpStatus.OK);
     }
 }

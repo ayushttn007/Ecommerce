@@ -1,10 +1,9 @@
 package com.Ecomm.Ecommerce.controller;
 
 import com.Ecomm.Ecommerce.Dao.CustomerProfileDao;
+import com.Ecomm.Ecommerce.Dao.CustomerUpdateDao;
 import com.Ecomm.Ecommerce.Dao.PasswordDao;
-import com.Ecomm.Ecommerce.Dao.SellerAddressDao;
-import com.Ecomm.Ecommerce.Dao.SellerProfileDao;
-import com.Ecomm.Ecommerce.dto.AddressDto;
+import com.Ecomm.Ecommerce.Dao.AddressDao;
 import com.Ecomm.Ecommerce.entities.Address;
 import com.Ecomm.Ecommerce.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,23 +39,23 @@ public class CustomerController {
 
     @PatchMapping("/customer/update_profile")
     @PreAuthorize("hasAuthority('CUSTOMER')")
-    public ResponseEntity<String> UpdateProfile(Authentication authentication,@RequestBody CustomerProfileDao customerProfileDao){
+    public ResponseEntity<String> UpdateProfile(Authentication authentication,@RequestBody CustomerUpdateDao customerUpdateDao){
         String userEmail = authentication.getName();
-        String responseMessage = customerService.updateProfile(userEmail,customerProfileDao);
+        String responseMessage = customerService.updateProfile(userEmail,customerUpdateDao);
         return new ResponseEntity<>(responseMessage,HttpStatus.OK);
     }
 
     @PatchMapping("/customer/update_password")
     @PreAuthorize("hasAuthority('CUSTOMER')")
-    public ResponseEntity<String> UpdatePassword(Authentication authentication,@RequestBody PasswordDao sellerPasswordDao){
+    public ResponseEntity<String> UpdatePassword(Authentication authentication,@RequestBody PasswordDao customerPasswordDao){
         String userEmail = authentication.getName();
-        String responseMessage = customerService.updatePassword(userEmail,sellerPasswordDao);
+        String responseMessage = customerService.updatePassword(userEmail,customerPasswordDao);
         return new ResponseEntity<>(responseMessage,HttpStatus.OK);
     }
 
     @PatchMapping("/customer/update_address")
     @PreAuthorize("hasAuthority('CUSTOMER')")
-    public  ResponseEntity<String> updateAddress(Authentication authentication,@RequestBody SellerAddressDao customerAddressDao,@RequestParam long addressid){
+    public  ResponseEntity<String> updateAddress(Authentication authentication, @RequestBody AddressDao customerAddressDao, @RequestParam long addressid){
         String userEmail = authentication.getName();
         String responseMessage = customerService.updateAddress(userEmail,customerAddressDao,addressid);
         return new ResponseEntity<>(responseMessage,HttpStatus.OK);
@@ -71,7 +70,7 @@ public class CustomerController {
 
     @PostMapping("customer/add_address")
     @PreAuthorize("hasAuthority('CUSTOMER')")
-    public ResponseEntity<String> addAddress(Authentication authentication,@RequestBody SellerAddressDao customerAddressDao){
+    public ResponseEntity<String> addAddress(Authentication authentication,@RequestBody AddressDao customerAddressDao){
         String userEmail = authentication.getName();
         String responseMessage = customerService.addAddress(userEmail,customerAddressDao);
         return new ResponseEntity<>(responseMessage,HttpStatus.OK);

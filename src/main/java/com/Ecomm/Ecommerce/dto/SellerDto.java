@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -31,5 +32,6 @@ public class SellerDto extends UserDto {
     @Size(min = 2, max=30, message = "Enter a valid company name.")
     private  String companyName;
 
+    @Valid
     private  AddressDto address;
 }
