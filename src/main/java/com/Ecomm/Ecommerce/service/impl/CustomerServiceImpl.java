@@ -1,6 +1,10 @@
 package com.Ecomm.Ecommerce.service.impl;
 
-import com.Ecomm.Ecommerce.Dao.*;
+import com.Ecomm.Ecommerce.DTO.AddressDto;
+import com.Ecomm.Ecommerce.DTO.PasswordDto;
+import com.Ecomm.Ecommerce.DTO.ResponseDTO.CustomerProfileDto;
+import com.Ecomm.Ecommerce.DTO.UpdateDTO.AddressUpdateDto;
+import com.Ecomm.Ecommerce.DTO.UpdateDTO.CustomerUpdateDto;
 import com.Ecomm.Ecommerce.entities.Address;
 import com.Ecomm.Ecommerce.entities.Customer;
 import com.Ecomm.Ecommerce.entities.User;
@@ -43,22 +47,11 @@ public class CustomerServiceImpl implements CustomerService {
     @Autowired
     BCryptPasswordEncoder passwordEncoder;
 
-    public CustomerProfileDao getCustomerProfile(String userEmail){
+    public CustomerProfileDto getCustomerProfile(String userEmail){
         User user = userRepo.findByEmail(userEmail);
 
-//        if(user == null) {
-//            throw new UserNotFoundException(
-//                    messageSource.getMessage("api.error.userNotFound",null, Locale.ENGLISH)
-//            );
-//        }
         Customer customer = customerRepo.findByUser(user);
-//        List<Address> customerAddresses = customer.getAddresses();
-//        if(customer == null){
-//            throw new UserNotFoundException(
-//                    messageSource.getMessage("api.error.userNotFound",null,Locale.ENGLISH)
-//            );
-//        }
-        CustomerProfileDao customerProfile  = new CustomerProfileDao();
+        CustomerProfileDto customerProfile  = new CustomerProfileDto();
 
         customerProfile.setUserid(user.getId());
         customerProfile.setFirstName(user.getFirstName());
@@ -66,21 +59,6 @@ public class CustomerServiceImpl implements CustomerService {
         customerProfile.setEmail(user.getEmail());
         customerProfile.set_active(user.isActive());
         customerProfile.setContact(customer.getContact());
-//        List<Address> customerResponseList = new ArrayList<>();
-//        customerAddresses.forEach((customerAddress) ->
-//                {
-//                   Address address = new Address();
-//                   address.setCountry(customerAddress.getCountry());
-//                   address.setCity(customerAddress.getCity());
-//                   address.setAddressLine(customerAddress.getAddressLine());
-//                   address.setZipCode(customerAddress.getZipCode());
-//                   address.setLabel(customerAddress.getLabel());
-//                   address.setState(customerAddress.getState());
-//
-//                   customerResponseList.add(address);
-//                }
-//        );
-//        customerProfile.setAddresses(customerResponseList);
         return customerProfile;
     }
 
@@ -93,12 +71,12 @@ public class CustomerServiceImpl implements CustomerService {
 
    }
 
-    public String updateProfile(String userEmail, CustomerUpdateDao customerUpdateDao){
+    public String updateProfile(String userEmail, CustomerUpdateDto customerUpdateDto){
         User user = userRepo.findByEmail(userEmail);
         Customer customer = user.getCustomer();
 
-        BeanUtils.copyProperties(customerUpdateDao, user, getNullPropertyNames(customerUpdateDao));
-        BeanUtils.copyProperties(customerUpdateDao, customer, getNullPropertyNames(customerUpdateDao));
+        BeanUtils.copyProperties(customerUpdateDto, user, getNullPropertyNames(customerUpdateDto));
+        BeanUtils.copyProperties(customerUpdateDto, customer, getNullPropertyNames(customerUpdateDto));
 
         userRepo.save(user);
         customerRepo.save(customer);
@@ -118,21 +96,18 @@ public class CustomerServiceImpl implements CustomerService {
         return emptyNames.toArray(new String[0]);
     }
 
-    public String updatePassword(String userEmail, PasswordDao customerPasswordDao) {
+    public String updatePassword(String userEmail, PasswordDto customerPasswordDto) {
         User user = userRepo.findByEmail(userEmail);
         Customer customer = user.getCustomer();
-        String encodePassword = passwordEncoder.encode(customerPasswordDao.getConfirmPassword());
+        String encodePassword = passwordEncoder.encode(customerPasswordDto.getConfirmPassword());
 
-        String userPassword = customerPasswordDao.getPassword();
-        String userConfirmPassword = customerPasswordDao.getConfirmPassword();
+        String userPassword = customerPasswordDto.getPassword();
+        String userConfirmPassword = customerPasswordDto.getConfirmPassword();
         if(!(userPassword.equals(userConfirmPassword))) {
             throw new PasswordNotMatchedException(
                     messageSource.getMessage("api.error.passwordNotMatched",null, Locale.ENGLISH)
             );
         }
-
-//        BeanUtils.copyProperties(sellerPasswordDao, user, getNullPropertyNames(sellerPasswordDao));
-//        BeanUtils.copyProperties(sellerPasswordDao, seller, getNullPropertyNames(sellerPasswordDao));
         user.setPassword(encodePassword);
         user.setPasswordUpdateDate(new Date());
         userRepo.save(user);
@@ -143,7 +118,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
 
-    public String updateAddress(String userEmail, AddressDao customerAddressDao, long addressId) {
+    public String updateAddress(String userEmail, AddressUpdateDto customerAddress, long addressId) {
         Address address = addressRepo.findById(addressId).orElseThrow(
                 () ->  new ResourceNotFoundException(
                         messageSource.getMessage("api.error.addressNotFound",null,Locale.ENGLISH)
@@ -152,23 +127,23 @@ public class CustomerServiceImpl implements CustomerService {
 
         User user = userRepo.findByEmail(userEmail);
         Customer customer = customerRepo.findByUser(user);
-        // throw exception
-        long customerid;
+
+        long customerId;
         if(address.getCustomer()!= null){
-            customerid = address.getCustomer().getId();
+            customerId = address.getSeller().getId();
+            if(customerId != customer.getId()){
+                throw new ResourceNotFoundException(
+                        messageSource.getMessage("api.error.addressNotFound",null,Locale.ENGLISH)
+                );
+            }else{
+                BeanUtils.copyProperties(customerAddress, address, getNullPropertyNames(customerAddress));
+                addressRepo.save(address);
+                return messageSource.getMessage("api.response.addressChanged",null,Locale.ENGLISH);
+            }
         }else{
             throw  new ResourceNotFoundException(
                     messageSource.getMessage("api.error.addressNotFound",null,Locale.ENGLISH)
             );
-        }
-        if(customerid != customer.getId()){
-            throw new ResourceNotFoundException(
-                    messageSource.getMessage("api.error.addressNotFound",null,Locale.ENGLISH)
-            );
-        }else{
-            BeanUtils.copyProperties(customerAddressDao, address, getNullPropertyNames(customerAddressDao));
-            addressRepo.save(address);
-            return messageSource.getMessage("api.response.addressChanged",null,Locale.ENGLISH);
         }
 
     }
@@ -182,43 +157,37 @@ public class CustomerServiceImpl implements CustomerService {
 
         User user = userRepo.findByEmail(userEmail);
         Customer customer = customerRepo.findByUser(user);
-        // throw exception
-        long customerid;
+
+        long customerId;
         if(address.getCustomer()!= null){
-            customerid = address.getCustomer().getId();
+            customerId = address.getSeller().getId();
+            if(customerId != customer.getId()){
+                throw new ResourceNotFoundException(
+                        messageSource.getMessage("api.error.addressNotFound",null,Locale.ENGLISH)
+                );
+            }else{
+                 addressRepo.delete(address);
+                return messageSource.getMessage("api.response.addressDelete", null, Locale.ENGLISH);
+            }
         }else{
             throw  new ResourceNotFoundException(
                     messageSource.getMessage("api.error.addressNotFound",null,Locale.ENGLISH)
             );
         }
-
-
-
-        if(customerid != customer.getId()){
-            throw new ResourceNotFoundException(
-                    messageSource.getMessage("api.error.addressNotFound",null,Locale.ENGLISH)
-            );
-        }
-          else {
-            addressRepo.delete(address);
-            return messageSource.getMessage("api.response.addressDelete", null, Locale.ENGLISH);
-        }
     }
 
-    public String addAddress(String userEmail, AddressDao customerAddressDao){
+    public String addAddress(String userEmail, AddressDto customerAddressDto){
         User user = userRepo.findByEmail(userEmail);
         Customer customer = customerRepo.findByUser(user);
 
-      //  List<Address> customerAddress  = customer.getAddresses();
-
         Address address = new Address();
 
-        address.setCountry(customerAddressDao.getCountry());
-        address.setCity(customerAddressDao.getCity());
-        address.setState(customerAddressDao.getState());
-        address.setAddressLine(customerAddressDao.getAddressLine());
-        address.setLabel(customerAddressDao.getLabel());
-        address.setZipCode(customerAddressDao.getZipCode());
+        address.setCountry(customerAddressDto.getCountry());
+        address.setCity(customerAddressDto.getCity());
+        address.setState(customerAddressDto.getState());
+        address.setAddressLine(customerAddressDto.getAddressLine());
+        address.setLabel(customerAddressDto.getLabel());
+        address.setZipCode(customerAddressDto.getZipCode());
         address.setCustomer(customer);
 
         addressRepo.save(address);

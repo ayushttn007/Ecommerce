@@ -1,13 +1,12 @@
 package com.Ecomm.Ecommerce.service.impl;
 
-import com.Ecomm.Ecommerce.dto.CustomerDto;
-import com.Ecomm.Ecommerce.dto.SellerDto;
+import com.Ecomm.Ecommerce.DTO.CustomerDto;
+import com.Ecomm.Ecommerce.DTO.SellerDto;
 import com.Ecomm.Ecommerce.entities.*;
 import com.Ecomm.Ecommerce.handler.PasswordNotMatchedException;
 import com.Ecomm.Ecommerce.handler.UserAlreadyExistsException;
 import com.Ecomm.Ecommerce.repository.*;
 import com.Ecomm.Ecommerce.service.UserService;
-import org.apache.logging.log4j.message.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -75,25 +74,7 @@ public class UserServiceImpl implements UserService {
         Customer customer = new Customer();
         customer.setContact(customerDto.getContact());
 
-//        customerDto.getAddress().forEach(AddressDto -> {
-//            Address address= new Address();
-//            address.setCity(AddressDto.getCity());
-//            address.setState(AddressDto.getState());
-//            address.setAddressLine(AddressDto.getAddressLine());
-//            address.setZipCode(AddressDto.getZipCode());
-//            address.setCountry(AddressDto.getCountry());
-//            address.setLabel(AddressDto.getLabel());
-//            address.setCustomer(customer);
-//
-//            addressRepo.save(address);
-//
-//        });
-
         customer.setUser(user);
-//        customerAddress.setCustomer(customer);
-//       customer.setAddresses(customerAddresses);
-
-
 
         customerRepo.save(customer);
         userRepo.save(user);

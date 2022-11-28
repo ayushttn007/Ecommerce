@@ -1,6 +1,5 @@
 package com.Ecomm.Ecommerce.service.impl;
 
-import com.Ecomm.Ecommerce.dto.PasswordDto;
 import com.Ecomm.Ecommerce.entities.User;
 import com.Ecomm.Ecommerce.entities.VerificationToken;
 import com.Ecomm.Ecommerce.handler.InvalidTokenException;
@@ -9,8 +8,6 @@ import com.Ecomm.Ecommerce.handler.UserNotFoundException;
 import com.Ecomm.Ecommerce.repository.UserRepo;
 import com.Ecomm.Ecommerce.repository.VerificationTokenRepository;
 import com.Ecomm.Ecommerce.service.EmailService;
-import net.bytebuddy.asm.Advice;
-import org.springframework.cglib.core.Local;
 import org.springframework.context.MessageSource;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.apache.commons.logging.Log;

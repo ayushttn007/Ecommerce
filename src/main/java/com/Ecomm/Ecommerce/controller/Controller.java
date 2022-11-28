@@ -1,20 +1,15 @@
 package com.Ecomm.Ecommerce.controller;
 
 
-import com.Ecomm.Ecommerce.dto.*;
-import com.Ecomm.Ecommerce.entities.Seller;
+import com.Ecomm.Ecommerce.DTO.*;
 import com.Ecomm.Ecommerce.repository.UserRepo;
 import com.Ecomm.Ecommerce.service.EmailService;
 import com.Ecomm.Ecommerce.service.UserAccountService;
 import com.Ecomm.Ecommerce.service.UserService;
-import com.Ecomm.Ecommerce.service.impl.EmailServiceImpl;
-import com.Ecomm.Ecommerce.service.impl.UserAccountServiceImpl;
-import com.Ecomm.Ecommerce.service.impl.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.mail.MessagingException;
@@ -35,19 +30,6 @@ EmailService emailService;
 
 @Autowired
 UserAccountService userAccountService;
-
-
-    @GetMapping(value = "/")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public ResponseEntity<String> home(){
-        return ResponseEntity.ok().body("Welcome");
-    }
-    // Get mapping for products
-    @GetMapping(path = "api/products")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public ResponseEntity<String> products(){
-        return ResponseEntity.ok().body("List of Products");
-    }
 
     // Register Api for Seller
     @PostMapping(path = "api/register",headers = "Role=CUSTOMER")

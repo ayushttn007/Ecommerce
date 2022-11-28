@@ -1,9 +1,10 @@
 package com.Ecomm.Ecommerce.controller;
 
-import com.Ecomm.Ecommerce.Dao.CustomerProfileDao;
-import com.Ecomm.Ecommerce.Dao.CustomerUpdateDao;
-import com.Ecomm.Ecommerce.Dao.PasswordDao;
-import com.Ecomm.Ecommerce.Dao.AddressDao;
+import com.Ecomm.Ecommerce.DTO.AddressDto;
+import com.Ecomm.Ecommerce.DTO.PasswordDto;
+import com.Ecomm.Ecommerce.DTO.UpdateDTO.AddressUpdateDto;
+import com.Ecomm.Ecommerce.DTO.ResponseDTO.CustomerProfileDto;
+import com.Ecomm.Ecommerce.DTO.UpdateDTO.CustomerUpdateDto;
 import com.Ecomm.Ecommerce.entities.Address;
 import com.Ecomm.Ecommerce.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -23,9 +25,9 @@ public class CustomerController {
 
     @GetMapping("/customer/profile")
     @PreAuthorize("hasAuthority('CUSTOMER')")
-    public ResponseEntity<CustomerProfileDao> customerProfile(Authentication authentication) {
+    public ResponseEntity<CustomerProfileDto> customerProfile(Authentication authentication) {
         String userEmail = authentication.getName();
-        CustomerProfileDao customer = customerService.getCustomerProfile(userEmail);
+        CustomerProfileDto customer = customerService.getCustomerProfile(userEmail);
         return new ResponseEntity<>(customer, HttpStatus.ACCEPTED);
     }
 
@@ -39,23 +41,23 @@ public class CustomerController {
 
     @PatchMapping("/customer/update_profile")
     @PreAuthorize("hasAuthority('CUSTOMER')")
-    public ResponseEntity<String> UpdateProfile(Authentication authentication,@RequestBody CustomerUpdateDao customerUpdateDao){
+    public ResponseEntity<String> UpdateProfile(Authentication authentication,@Valid  @RequestBody CustomerUpdateDto customerUpdateDto){
         String userEmail = authentication.getName();
-        String responseMessage = customerService.updateProfile(userEmail,customerUpdateDao);
+        String responseMessage = customerService.updateProfile(userEmail,customerUpdateDto);
         return new ResponseEntity<>(responseMessage,HttpStatus.OK);
     }
 
     @PatchMapping("/customer/update_password")
     @PreAuthorize("hasAuthority('CUSTOMER')")
-    public ResponseEntity<String> UpdatePassword(Authentication authentication,@RequestBody PasswordDao customerPasswordDao){
+    public ResponseEntity<String> UpdatePassword(Authentication authentication,@Valid @RequestBody PasswordDto customerPasswordDto){
         String userEmail = authentication.getName();
-        String responseMessage = customerService.updatePassword(userEmail,customerPasswordDao);
+        String responseMessage = customerService.updatePassword(userEmail,customerPasswordDto);
         return new ResponseEntity<>(responseMessage,HttpStatus.OK);
     }
 
     @PatchMapping("/customer/update_address")
     @PreAuthorize("hasAuthority('CUSTOMER')")
-    public  ResponseEntity<String> updateAddress(Authentication authentication, @RequestBody AddressDao customerAddressDao, @RequestParam long addressid){
+    public  ResponseEntity<String> updateAddress(Authentication authentication, @Valid @RequestBody AddressUpdateDto customerAddressDao, @RequestParam long addressid){
         String userEmail = authentication.getName();
         String responseMessage = customerService.updateAddress(userEmail,customerAddressDao,addressid);
         return new ResponseEntity<>(responseMessage,HttpStatus.OK);
@@ -70,9 +72,9 @@ public class CustomerController {
 
     @PostMapping("customer/add_address")
     @PreAuthorize("hasAuthority('CUSTOMER')")
-    public ResponseEntity<String> addAddress(Authentication authentication,@RequestBody AddressDao customerAddressDao){
+    public ResponseEntity<String> addAddress(Authentication authentication,@Valid @RequestBody AddressDto customerAddressDto){
         String userEmail = authentication.getName();
-        String responseMessage = customerService.addAddress(userEmail,customerAddressDao);
+        String responseMessage = customerService.addAddress(userEmail,customerAddressDto);
         return new ResponseEntity<>(responseMessage,HttpStatus.OK);
     }
 

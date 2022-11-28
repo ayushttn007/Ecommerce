@@ -1,15 +1,15 @@
 package com.Ecomm.Ecommerce.service;
 
-import com.Ecomm.Ecommerce.Dao.CustomerDao;
-import com.Ecomm.Ecommerce.Dao.SellerDao;
-import org.springframework.data.domain.Pageable;
+import com.Ecomm.Ecommerce.DTO.ResponseDTO.CustomerResponseDto;
+import com.Ecomm.Ecommerce.DTO.ResponseDTO.SellerResponseDto;
+
 
 import java.util.List;
 
 public interface AdminUserService {
 
-    public List<CustomerDao> getRegisterCustomers();
-    public List<SellerDao> getRegisterSellers();
+    public List<CustomerResponseDto> getRegisterCustomers(Integer pageNo, Integer pageSize, String sortBy);
+    public List<SellerResponseDto> getRegisterSellers(Integer pageNo, Integer pageSize, String sortBy);
 
     public String activateUser(Long userId);
     public String deActivateUser(Long userId);

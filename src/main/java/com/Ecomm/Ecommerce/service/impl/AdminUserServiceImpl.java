@@ -1,7 +1,7 @@
 package com.Ecomm.Ecommerce.service.impl;
 
-import com.Ecomm.Ecommerce.Dao.CustomerDao;
-import com.Ecomm.Ecommerce.Dao.SellerDao;
+import com.Ecomm.Ecommerce.DTO.ResponseDTO.CustomerResponseDto;
+import com.Ecomm.Ecommerce.DTO.ResponseDTO.SellerResponseDto;
 import com.Ecomm.Ecommerce.entities.Customer;
 import com.Ecomm.Ecommerce.entities.Seller;
 import com.Ecomm.Ecommerce.entities.User;
@@ -10,10 +10,14 @@ import com.Ecomm.Ecommerce.repository.CustomerRepo;
 import com.Ecomm.Ecommerce.repository.SellerRepo;
 import com.Ecomm.Ecommerce.repository.UserRepo;
 import com.Ecomm.Ecommerce.service.AdminUserService;
-import net.bytebuddy.implementation.auxiliary.AuxiliaryType;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Logger;
 
 @Service
 @Transactional
@@ -40,46 +45,50 @@ public class AdminUserServiceImpl implements AdminUserService {
 
      @Autowired
     MessageSource messageSource;
-    public List<CustomerDao> getRegisterCustomers(){
-        List<Customer> customersList = customerRepo.findAll();
-        List<CustomerDao> customerDaoList =  new ArrayList<>();
 
-        customersList.forEach((customer) ->
+    protected final Log logger = LogFactory.getLog(getClass());
+    public List<CustomerResponseDto> getRegisterCustomers(Integer pageNo, Integer pageSize, String sortBy){
+        logger.info("Get RegisterCustomer start Executing");
+        Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
+        Page<Customer> pagedResultCustomer = customerRepo.findAll(paging);
+        List<CustomerResponseDto> customerDtoList =  new ArrayList<>();
+
+        pagedResultCustomer.forEach((customer) ->
                 {
                     User user  = customer.getUser();
-                    CustomerDao customerDao = new CustomerDao();
-                    customerDao.setUserid(user.getId());
-                    customerDao.setFullName(user.getFirstName() + " " + user.getMiddleName() + " " + user.getLastName());
-                    customerDao.setEmail(user.getEmail());
-                    customerDao.set_active(user.isActive());
-                    customerDaoList.add(customerDao);
+                    CustomerResponseDto customerDto = new CustomerResponseDto();
+                    customerDto.setUserid(user.getId());
+                    customerDto.setFullName(user.getFirstName() + " " + user.getMiddleName() + " " + user.getLastName());
+                    customerDto.setEmail(user.getEmail());
+                    customerDto.set_active(user.isActive());
+                    customerDtoList.add(customerDto);
                 }
                 );
 
-        return customerDaoList;
+        return customerDtoList;
     }
 
-    public List<SellerDao> getRegisterSellers() {
-        List<Seller> sellerLists = sellerRepo.findAll();
-        System.out.println(sellerLists.toString());
-        List<SellerDao> sellerDaoList =  new ArrayList<>();
+    public List<SellerResponseDto> getRegisterSellers(Integer pageNo, Integer pageSize, String sortBy) {
+        Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
+        Page<Seller> pagedResultSeller = sellerRepo.findAll(paging);
+        List<SellerResponseDto> sellerDtoList =  new ArrayList<>();
 
-        sellerLists.forEach((seller) ->
+        pagedResultSeller.forEach((seller) ->
                 {
                     User user  = seller.getUser();
-                    SellerDao sellerDao = new SellerDao();
-                    sellerDao.setUserid(user.getId());
-                    sellerDao.setFullName(user.getFirstName() + " " + user.getMiddleName() + " " + user.getLastName());
-                    sellerDao.setEmail(user.getEmail());
-                    sellerDao.set_active(user.isActive());
-                    sellerDao.setCompanyName(seller.getCompanyName());
-                    sellerDao.setAddress(seller.getAddress());
-                    sellerDao.setCompanyContact(seller.getCompanyContact());
-                    sellerDaoList.add(sellerDao);
+                    SellerResponseDto sellerResponseDto = new SellerResponseDto();
+                    sellerResponseDto.setUserid(user.getId());
+                    sellerResponseDto.setFullName(user.getFirstName() + " " + user.getMiddleName() + " " + user.getLastName());
+                    sellerResponseDto.setEmail(user.getEmail());
+                    sellerResponseDto.set_active(user.isActive());
+                    sellerResponseDto.setCompanyName(seller.getCompanyName());
+                    sellerResponseDto.setAddress(seller.getAddress());
+                    sellerResponseDto.setCompanyContact(seller.getCompanyContact());
+                    sellerDtoList.add(sellerResponseDto);
                 }
         );
 
-        return sellerDaoList;
+        return sellerDtoList;
     }
 
     public String activateUser(Long userId) {
