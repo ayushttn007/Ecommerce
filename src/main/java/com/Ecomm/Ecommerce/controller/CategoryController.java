@@ -2,16 +2,14 @@ package com.Ecomm.Ecommerce.controller;
 
 import com.Ecomm.Ecommerce.Dto.CategoryDto;
 import com.Ecomm.Ecommerce.Dto.CategoryMetaFieldDto;
+import com.Ecomm.Ecommerce.Dto.UpdateDto.CategoryUpdateDto;
 import com.Ecomm.Ecommerce.entities.CategoryMetadataField;
 import com.Ecomm.Ecommerce.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -43,6 +41,14 @@ public class CategoryController {
 
     public ResponseEntity<String> addCategory(@RequestBody CategoryDto categoryDto){
         String responseMessage = categoryService.saveCategory(categoryDto);
+        return new ResponseEntity<>(responseMessage, HttpStatus.OK);
+    }
+
+    @PutMapping(path = "/update/category")
+//    @PreAuthorize("hasAuthority('ADMIN')")
+
+    public ResponseEntity<String> updateCategory(@RequestParam long categoryId,@RequestBody CategoryUpdateDto categoryDto){
+        String responseMessage = categoryService.updateCategory(categoryId,categoryDto);
         return new ResponseEntity<>(responseMessage, HttpStatus.OK);
     }
 }
