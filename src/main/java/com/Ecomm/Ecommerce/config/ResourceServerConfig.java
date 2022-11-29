@@ -41,7 +41,9 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
                         "/swagger-resources/**",
                         "/configuration/security",
                         "/webjars/**",
-                        "/swagger-ui/index.html#/").permitAll()
+                        "/swagger-ui/index.html#/",
+                        "/add/metadata_field",
+                        "/metadata_field").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .sessionManagement()

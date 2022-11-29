@@ -8,6 +8,7 @@ import javax.persistence.*;
 
 @Setter
 @Getter
+@Entity
 public class CategoryMetadataFieldValue {
 
     @EmbeddedId
