@@ -1,7 +1,7 @@
 package com.Ecomm.Ecommerce.service;
 
-import com.Ecomm.Ecommerce.DTO.ResponseDTO.CustomerResponseDto;
-import com.Ecomm.Ecommerce.DTO.ResponseDTO.SellerResponseDto;
+import com.Ecomm.Ecommerce.Dto.ResponseDto.CustomerResponseDto;
+import com.Ecomm.Ecommerce.Dto.ResponseDto.SellerResponseDto;
 
 
 import java.util.List;

@@ -1,10 +1,10 @@
 package com.Ecomm.Ecommerce.service.impl;
 
-import com.Ecomm.Ecommerce.DTO.AddressDto;
-import com.Ecomm.Ecommerce.DTO.PasswordDto;
-import com.Ecomm.Ecommerce.DTO.ResponseDTO.CustomerProfileDto;
-import com.Ecomm.Ecommerce.DTO.UpdateDTO.AddressUpdateDto;
-import com.Ecomm.Ecommerce.DTO.UpdateDTO.CustomerUpdateDto;
+import com.Ecomm.Ecommerce.Dto.AddressDto;
+import com.Ecomm.Ecommerce.Dto.PasswordDto;
+import com.Ecomm.Ecommerce.Dto.ResponseDto.CustomerProfileDto;
+import com.Ecomm.Ecommerce.Dto.UpdateDto.AddressUpdateDto;
+import com.Ecomm.Ecommerce.Dto.UpdateDto.CustomerUpdateDto;
 import com.Ecomm.Ecommerce.entities.Address;
 import com.Ecomm.Ecommerce.entities.Customer;
 import com.Ecomm.Ecommerce.entities.User;
@@ -15,16 +15,16 @@ import com.Ecomm.Ecommerce.repository.CustomerRepo;
 import com.Ecomm.Ecommerce.repository.UserRepo;
 import com.Ecomm.Ecommerce.service.CustomerService;
 import com.Ecomm.Ecommerce.service.EmailService;
+import com.Ecomm.Ecommerce.utils.IgnoreNull;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.beans.PropertyDescriptor;
 import java.util.*;
 
 @Service
@@ -47,10 +47,14 @@ public class CustomerServiceImpl implements CustomerService {
     @Autowired
     BCryptPasswordEncoder passwordEncoder;
 
+    protected final Log logger = LogFactory.getLog(getClass());
+
     public CustomerProfileDto getCustomerProfile(String userEmail){
+        logger.info("Get Customer Profile : Execution Start");
         User user = userRepo.findByEmail(userEmail);
 
         Customer customer = customerRepo.findByUser(user);
+        logger.info("Get Customer Profile : Execution Start");
         CustomerProfileDto customerProfile  = new CustomerProfileDto();
 
         customerProfile.setUserid(user.getId());
@@ -59,44 +63,40 @@ public class CustomerServiceImpl implements CustomerService {
         customerProfile.setEmail(user.getEmail());
         customerProfile.set_active(user.isActive());
         customerProfile.setContact(customer.getContact());
+        logger.info("Get Customer Profile : Execution End");
         return customerProfile;
     }
 
    public  List<Address> getCustomerAddress(String userEmail){
+       logger.info("Get Customer Address : Execution Start");
             User user = userRepo.findByEmail(userEmail);
        Customer customer = customerRepo.findByUser(user);
 
        List<Address> customerAddresses = customer.getAddresses();
+       logger.info("Get Customer Address : Execution End");
        return customerAddresses;
 
    }
 
     public String updateProfile(String userEmail, CustomerUpdateDto customerUpdateDto){
+        logger.info("Update Profile : Execution Start");
         User user = userRepo.findByEmail(userEmail);
         Customer customer = user.getCustomer();
 
-        BeanUtils.copyProperties(customerUpdateDto, user, getNullPropertyNames(customerUpdateDto));
-        BeanUtils.copyProperties(customerUpdateDto, customer, getNullPropertyNames(customerUpdateDto));
+        BeanUtils.copyProperties(customerUpdateDto, user, IgnoreNull.getNullPropertyNames(customerUpdateDto));
+        BeanUtils.copyProperties(customerUpdateDto, customer, IgnoreNull.getNullPropertyNames(customerUpdateDto));
 
         userRepo.save(user);
+        logger.info("Update Profile : User Saved");
         customerRepo.save(customer);
+        logger.info("Update Profile : Customer Saved");
+        logger.info("Update Profile : Execution End");
         return messageSource.getMessage("api.response.profileUpdate",null,Locale.ENGLISH);
     }
 
 
-    public static String[] getNullPropertyNames (Object source) {
-        final BeanWrapper src = new BeanWrapperImpl(source);
-        PropertyDescriptor[] pds = src.getPropertyDescriptors();
-
-        Set<String> emptyNames = new HashSet<>();
-        for(PropertyDescriptor pd : pds) {
-            Object srcValue = src.getPropertyValue(pd.getName());
-            if (srcValue == null) emptyNames.add(pd.getName());
-        }
-        return emptyNames.toArray(new String[0]);
-    }
-
     public String updatePassword(String userEmail, PasswordDto customerPasswordDto) {
+        logger.info("Update Password : Execution Start");
         User user = userRepo.findByEmail(userEmail);
         Customer customer = user.getCustomer();
         String encodePassword = passwordEncoder.encode(customerPasswordDto.getConfirmPassword());
@@ -111,14 +111,19 @@ public class CustomerServiceImpl implements CustomerService {
         user.setPassword(encodePassword);
         user.setPasswordUpdateDate(new Date());
         userRepo.save(user);
+        logger.info("Update Password : Save Password");
         customerRepo.save(customer);
+        logger.info("Update Password : Save Customer");
         // BONUS FEATURE - SEND MAIL ON PASSWORD CHANGE
         emailService.sendPasswordChangeMail(user);
+        logger.info("Update Password : Send Password Changed Mail");
+        logger.info("Update Password : Execution End");
         return messageSource.getMessage("api.response.passwordChanged",null,Locale.ENGLISH);
     }
 
 
     public String updateAddress(String userEmail, AddressUpdateDto customerAddress, long addressId) {
+        logger.info("Update Address : Execution Start");
         Address address = addressRepo.findById(addressId).orElseThrow(
                 () ->  new ResourceNotFoundException(
                         messageSource.getMessage("api.error.addressNotFound",null,Locale.ENGLISH)
@@ -131,13 +136,18 @@ public class CustomerServiceImpl implements CustomerService {
         long customerId;
         if(address.getCustomer()!= null){
             customerId = address.getSeller().getId();
+            logger.info("Update Address : customer ID" + customerId);
             if(customerId != customer.getId()){
+                logger.info("Update Address : customer ID" + customerId + " " + customer.getId());
+                logger.info("Update Address : customer ID not Matched");
                 throw new ResourceNotFoundException(
                         messageSource.getMessage("api.error.addressNotFound",null,Locale.ENGLISH)
                 );
             }else{
-                BeanUtils.copyProperties(customerAddress, address, getNullPropertyNames(customerAddress));
+                BeanUtils.copyProperties(customerAddress, address, IgnoreNull.getNullPropertyNames(customerAddress));
                 addressRepo.save(address);
+                logger.info("Update Address : Address Saved");
+                logger.info("Update Address : Execution End");
                 return messageSource.getMessage("api.response.addressChanged",null,Locale.ENGLISH);
             }
         }else{
@@ -149,6 +159,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     public String deleteAddress(String userEmail,long addressId){
+        logger.info("Delete Address : Execution Start");
         Address address = addressRepo.findById(addressId).orElseThrow(
                 () ->  new ResourceNotFoundException(
                         messageSource.getMessage("api.error.addressNotFound",null,Locale.ENGLISH)
@@ -161,12 +172,17 @@ public class CustomerServiceImpl implements CustomerService {
         long customerId;
         if(address.getCustomer()!= null){
             customerId = address.getSeller().getId();
+            logger.info("Delete Address : customer ID" + customerId);
             if(customerId != customer.getId()){
+                logger.info("Delete Address : customer ID" + customerId + " " + customer.getId());
+                logger.info("Delete Address : customer ID not Matched");
                 throw new ResourceNotFoundException(
                         messageSource.getMessage("api.error.addressNotFound",null,Locale.ENGLISH)
                 );
             }else{
                  addressRepo.delete(address);
+                logger.info("Delete Address : Address Deleted");
+                logger.info("Delete Address : Execution End");
                 return messageSource.getMessage("api.response.addressDelete", null, Locale.ENGLISH);
             }
         }else{
@@ -177,6 +193,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     public String addAddress(String userEmail, AddressDto customerAddressDto){
+        logger.info("Add Address : Execution Start");
         User user = userRepo.findByEmail(userEmail);
         Customer customer = customerRepo.findByUser(user);
 
@@ -191,6 +208,8 @@ public class CustomerServiceImpl implements CustomerService {
         address.setCustomer(customer);
 
         addressRepo.save(address);
+        logger.info("Add Address : Address Saved");
+        logger.info("Add Address : Execution End");
         return messageSource.getMessage("api.response.addressAdded",null,Locale.ENGLISH);
     }
 }

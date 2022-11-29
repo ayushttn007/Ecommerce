@@ -1,7 +1,7 @@
 package com.Ecomm.Ecommerce.service;
 
-import com.Ecomm.Ecommerce.DTO.CustomerDto;
-import com.Ecomm.Ecommerce.DTO.SellerDto;
+import com.Ecomm.Ecommerce.Dto.CustomerDto;
+import com.Ecomm.Ecommerce.Dto.SellerDto;
 
 public interface UserService {
     public void registerSeller(SellerDto sellerDto, String role);

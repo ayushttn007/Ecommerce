@@ -1,10 +1,10 @@
 package com.Ecomm.Ecommerce.controller;
 
 
-import com.Ecomm.Ecommerce.DTO.PasswordDto;
-import com.Ecomm.Ecommerce.DTO.ResponseDTO.SellerProfileDto;
-import com.Ecomm.Ecommerce.DTO.UpdateDTO.AddressUpdateDto;
-import com.Ecomm.Ecommerce.DTO.UpdateDTO.SellerUpdateDto;
+import com.Ecomm.Ecommerce.Dto.PasswordDto;
+import com.Ecomm.Ecommerce.Dto.ResponseDto.SellerProfileDto;
+import com.Ecomm.Ecommerce.Dto.UpdateDto.AddressUpdateDto;
+import com.Ecomm.Ecommerce.Dto.UpdateDto.SellerUpdateDto;
 import com.Ecomm.Ecommerce.service.SellerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

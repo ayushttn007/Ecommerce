@@ -1,7 +1,7 @@
 package com.Ecomm.Ecommerce.service.impl;
 
-import com.Ecomm.Ecommerce.DTO.ResponseDTO.CustomerResponseDto;
-import com.Ecomm.Ecommerce.DTO.ResponseDTO.SellerResponseDto;
+import com.Ecomm.Ecommerce.Dto.ResponseDto.CustomerResponseDto;
+import com.Ecomm.Ecommerce.Dto.ResponseDto.SellerResponseDto;
 import com.Ecomm.Ecommerce.entities.Customer;
 import com.Ecomm.Ecommerce.entities.Seller;
 import com.Ecomm.Ecommerce.entities.User;
@@ -25,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.logging.Logger;
 
 @Service
 @Transactional
@@ -48,7 +47,8 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     protected final Log logger = LogFactory.getLog(getClass());
     public List<CustomerResponseDto> getRegisterCustomers(Integer pageNo, Integer pageSize, String sortBy){
-        logger.info("Get RegisterCustomer start Executing");
+        logger.info("Get RegisterCustomer : Execution Start");
+        logger.info("PageNo : " + pageNo + "pageSize : " + pageSize + "sortBy  : "+ sortBy);
         Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
         Page<Customer> pagedResultCustomer = customerRepo.findAll(paging);
         List<CustomerResponseDto> customerDtoList =  new ArrayList<>();
@@ -64,11 +64,13 @@ public class AdminUserServiceImpl implements AdminUserService {
                     customerDtoList.add(customerDto);
                 }
                 );
-
+        logger.info("Get RegisterCustomer : Execution End");
         return customerDtoList;
     }
 
     public List<SellerResponseDto> getRegisterSellers(Integer pageNo, Integer pageSize, String sortBy) {
+        logger.info("Get RegisterSeller : Execution Start");
+        logger.info("PageNo : " + pageNo + "pageSize : " + pageSize + "sortBy  : "+ sortBy);
         Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
         Page<Seller> pagedResultSeller = sellerRepo.findAll(paging);
         List<SellerResponseDto> sellerDtoList =  new ArrayList<>();
@@ -87,11 +89,12 @@ public class AdminUserServiceImpl implements AdminUserService {
                     sellerDtoList.add(sellerResponseDto);
                 }
         );
-
+        logger.info("Get RegisterSeller : Execution End");
         return sellerDtoList;
     }
 
     public String activateUser(Long userId) {
+        logger.info("activate User : Execution Start");
         User user = userRepo.findById(userId).orElseThrow(()->
                  new UserNotFoundException(
                          messageSource.getMessage("api.error.userNotFoundById",null, Locale.ENGLISH)
@@ -100,13 +103,17 @@ public class AdminUserServiceImpl implements AdminUserService {
 
         if(user.isActive()) return messageSource.getMessage("api.response.user.AccountVerified",null,Locale.ENGLISH);
         user.setActive(true);
+        logger.info("activate User : User activated");
         userRepo.save(user);
         emailService.sendUserActiveMail(user);
+        logger.info("activate User : Send Activation Mail");
+        logger.info("activate User : Execution End");
         return messageSource.getMessage("api.response.accountActivate",null,Locale.ENGLISH);
     }
 
 
     public String deActivateUser(Long userId) {
+        logger.info("DeActivate User : Execution Start");
         User user = userRepo.findById(userId).orElseThrow(()->
                 new UsernameNotFoundException(
                         messageSource.getMessage("api.error.userNotFoundById",null, Locale.ENGLISH)
@@ -115,8 +122,11 @@ public class AdminUserServiceImpl implements AdminUserService {
 
         if(!(user.isActive())) return messageSource.getMessage("api.response.accountAlreadyActive",null,Locale.ENGLISH);
         user.setActive(false);
+        logger.info("DeActivate User : User DeActivated");
         userRepo.save(user);
         emailService.sendUserDeactivedMail(user);
+        logger.info("DeActivate User : Send Activation Mail");
+        logger.info("DeActivate User : Execution End");
         return messageSource.getMessage("api.response.accountDeactivated",null,Locale.ENGLISH);
     }
 

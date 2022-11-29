@@ -1,9 +1,9 @@
 package com.Ecomm.Ecommerce.service;
 
-import com.Ecomm.Ecommerce.DTO.PasswordDto;
-import com.Ecomm.Ecommerce.DTO.ResponseDTO.SellerProfileDto;
-import com.Ecomm.Ecommerce.DTO.UpdateDTO.AddressUpdateDto;
-import com.Ecomm.Ecommerce.DTO.UpdateDTO.SellerUpdateDto;
+import com.Ecomm.Ecommerce.Dto.PasswordDto;
+import com.Ecomm.Ecommerce.Dto.ResponseDto.SellerProfileDto;
+import com.Ecomm.Ecommerce.Dto.UpdateDto.AddressUpdateDto;
+import com.Ecomm.Ecommerce.Dto.UpdateDto.SellerUpdateDto;
 
 public interface SellerService {
     public SellerProfileDto getSellerProfile(String userEmail);

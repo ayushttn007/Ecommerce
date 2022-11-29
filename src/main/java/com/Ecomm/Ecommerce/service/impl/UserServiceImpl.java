@@ -1,7 +1,7 @@
 package com.Ecomm.Ecommerce.service.impl;
 
-import com.Ecomm.Ecommerce.DTO.CustomerDto;
-import com.Ecomm.Ecommerce.DTO.SellerDto;
+import com.Ecomm.Ecommerce.Dto.CustomerDto;
+import com.Ecomm.Ecommerce.Dto.SellerDto;
 import com.Ecomm.Ecommerce.entities.*;
 import com.Ecomm.Ecommerce.handler.PasswordNotMatchedException;
 import com.Ecomm.Ecommerce.handler.UserAlreadyExistsException;

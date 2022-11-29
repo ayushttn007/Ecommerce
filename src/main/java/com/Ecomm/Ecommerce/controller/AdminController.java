@@ -1,7 +1,7 @@
 package com.Ecomm.Ecommerce.controller;
 
-import com.Ecomm.Ecommerce.DTO.ResponseDTO.CustomerResponseDto;
-import com.Ecomm.Ecommerce.DTO.ResponseDTO.SellerResponseDto;
+import com.Ecomm.Ecommerce.Dto.ResponseDto.CustomerResponseDto;
+import com.Ecomm.Ecommerce.Dto.ResponseDto.SellerResponseDto;
 import com.Ecomm.Ecommerce.service.AdminUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.server.EntityLinks;

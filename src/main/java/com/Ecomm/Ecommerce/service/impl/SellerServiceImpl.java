@@ -1,11 +1,10 @@
 package com.Ecomm.Ecommerce.service.impl;
 
-import com.Ecomm.Ecommerce.DTO.PasswordDto;
-import com.Ecomm.Ecommerce.DTO.ResponseDTO.SellerProfileDto;
-import com.Ecomm.Ecommerce.DTO.UpdateDTO.AddressUpdateDto;
-import com.Ecomm.Ecommerce.DTO.UpdateDTO.SellerUpdateDto;
+import com.Ecomm.Ecommerce.Dto.PasswordDto;
+import com.Ecomm.Ecommerce.Dto.ResponseDto.SellerProfileDto;
+import com.Ecomm.Ecommerce.Dto.UpdateDto.AddressUpdateDto;
+import com.Ecomm.Ecommerce.Dto.UpdateDto.SellerUpdateDto;
 import com.Ecomm.Ecommerce.entities.Address;
-import com.Ecomm.Ecommerce.entities.Customer;
 import com.Ecomm.Ecommerce.entities.Seller;
 import com.Ecomm.Ecommerce.entities.User;
 import com.Ecomm.Ecommerce.handler.PasswordNotMatchedException;
@@ -15,20 +14,18 @@ import com.Ecomm.Ecommerce.repository.AddressRepo;
 import com.Ecomm.Ecommerce.repository.SellerRepo;
 import com.Ecomm.Ecommerce.repository.UserRepo;
 import com.Ecomm.Ecommerce.service.SellerService;
+import com.Ecomm.Ecommerce.utils.IgnoreNull;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.beans.PropertyDescriptor;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Locale;
-import java.util.Set;
 
 @Service
 @Transactional
@@ -49,16 +46,22 @@ public class SellerServiceImpl implements SellerService {
     BCryptPasswordEncoder passwordEncoder;
 
     @Autowired EmailServiceImpl emailService;
+
+    protected final Log logger = LogFactory.getLog(getClass());
+
     public SellerProfileDto getSellerProfile(String userEmail) {
+        logger.info("get Seller Profile : Execution Start");
         User user = userRepo.findByEmail(userEmail);
 
         if(user == null) {
+            logger.info("get Seller Profile : User is null");
             throw new UserNotFoundException(
                     messageSource.getMessage("api.error.userNotFound",null,Locale.ENGLISH)
             );
         }
         Seller seller = sellerRepo.findByUser(user);
         if(seller == null){
+            logger.info("get Seller Profile : Seller is null");
             throw new UserNotFoundException(
                     messageSource.getMessage("api.error.userNotFound",null,Locale.ENGLISH)
             );
@@ -74,38 +77,32 @@ public class SellerServiceImpl implements SellerService {
         sellerProfile.setCompanyName(seller.getCompanyName());
         sellerProfile.setAddress(seller.getAddress());
 
+        logger.info("get Seller Profile : Execution End");
         return sellerProfile;
 
     }
 
 
-    public static String[] getNullPropertyNames (Object source) {
-        final BeanWrapper src = new BeanWrapperImpl(source);
-        PropertyDescriptor[] pds = src.getPropertyDescriptors();
-
-        Set<String> emptyNames = new HashSet<>();
-        for(PropertyDescriptor pd : pds) {
-            Object srcValue = src.getPropertyValue(pd.getName());
-            if (srcValue == null) emptyNames.add(pd.getName());
-        }
-        return emptyNames.toArray(new String[0]);
-    }
-
     public String updateSellerProfile(String userEmail, SellerUpdateDto sellerUpdateDto) {
+        logger.info("Update Seller Profile : Execution Start");
         User user = userRepo.findByEmail(userEmail);
         Seller seller = user.getSeller();
 
 
-        BeanUtils.copyProperties(sellerUpdateDto, user, getNullPropertyNames(sellerUpdateDto));
-        BeanUtils.copyProperties(sellerUpdateDto, seller, getNullPropertyNames(sellerUpdateDto));
+        BeanUtils.copyProperties(sellerUpdateDto, user, IgnoreNull.getNullPropertyNames(sellerUpdateDto));
+        BeanUtils.copyProperties(sellerUpdateDto, seller, IgnoreNull.getNullPropertyNames(sellerUpdateDto));
 
         userRepo.save(user);
+        logger.info("Update Seller Profile : User Save");
         sellerRepo.save(seller);
+        logger.info("Update Seller Profile : Seller Save");
+        logger.info("Update Seller Profile : Execution End");
         return messageSource.getMessage("api.response.profileUpdate",null,Locale.ENGLISH);
     }
 
 
     public String updateSellerPassword(String userEmail, PasswordDto sellerPasswordDto) {
+        logger.info("Update Seller Password : Execution Start");
         User user = userRepo.findByEmail(userEmail);
         Seller seller = user.getSeller();
         String encodePassword = passwordEncoder.encode(sellerPasswordDto.getConfirmPassword());
@@ -113,23 +110,25 @@ public class SellerServiceImpl implements SellerService {
         String userPassword = sellerPasswordDto.getPassword();
         String userConfirmPassword = sellerPasswordDto.getConfirmPassword();
         if(!(userPassword.equals(userConfirmPassword))) {
+            logger.info("Update Seller Password : Exception password does not matched");
             throw new PasswordNotMatchedException(
                     messageSource.getMessage("api.error.passwordNotMatched",null, Locale.ENGLISH)
             );
         }
 
-//        BeanUtils.copyProperties(sellerPasswordDao, user, getNullPropertyNames(sellerPasswordDao));
-//        BeanUtils.copyProperties(sellerPasswordDao, seller, getNullPropertyNames(sellerPasswordDao));
         user.setPassword(encodePassword);
         user.setPasswordUpdateDate(new Date());
         userRepo.save(user);
         sellerRepo.save(seller);
         // BONUS FEATURE - SEND MAIL ON PASSWORD CHANGE
+        logger.info("Update Seller Password : Sending password change mail");
         emailService.sendPasswordChangeMail(user);
+        logger.info("Update Seller Password : Execution End");
         return messageSource.getMessage("api.response.passwordChanged",null,Locale.ENGLISH);
     }
 
     public String updateSellerAddress(String userEmail, AddressUpdateDto addressDto, long addressId) {
+        logger.info("Update Seller Address : Execution Start");
         Address address = addressRepo.findById(addressId).orElseThrow(
                 () ->  new ResourceNotFoundException(
                         messageSource.getMessage("api.error.addressNotFound",null,Locale.ENGLISH)
@@ -145,15 +144,18 @@ public class SellerServiceImpl implements SellerService {
         if(address.getSeller()!= null){
             sellerId = address.getSeller().getId();
             if(sellerId != seller.getId()){
+                logger.info("Update Seller Address : throw Exception,sellerId != seller.getId()");
                 throw new ResourceNotFoundException(
                         messageSource.getMessage("api.error.addressNotFound",null,Locale.ENGLISH)
                 );
             }else{
-                BeanUtils.copyProperties(addressDto, address, getNullPropertyNames(addressDto));
+                BeanUtils.copyProperties(addressDto, address, IgnoreNull.getNullPropertyNames(addressDto));
                 addressRepo.save(address);
+                logger.info("Update Seller Address : address save");
                 return messageSource.getMessage("api.response.addressChanged",null,Locale.ENGLISH);
             }
         }else{
+            logger.info("Update Seller Address : throw Exception,address.getSeller == null");
             throw  new ResourceNotFoundException(
                     messageSource.getMessage("api.error.addressNotFound",null,Locale.ENGLISH)
             );

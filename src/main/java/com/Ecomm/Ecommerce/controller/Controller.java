@@ -1,7 +1,7 @@
 package com.Ecomm.Ecommerce.controller;
 
 
-import com.Ecomm.Ecommerce.DTO.*;
+import com.Ecomm.Ecommerce.Dto.*;
 import com.Ecomm.Ecommerce.repository.UserRepo;
 import com.Ecomm.Ecommerce.service.EmailService;
 import com.Ecomm.Ecommerce.service.UserAccountService;

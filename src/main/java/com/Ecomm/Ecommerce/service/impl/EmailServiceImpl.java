@@ -50,7 +50,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Async
     public void sendEmail(User user,String mailMessage,String subjectMessage){
-        logger.info("SendEmail Executed");
+        logger.info("SendEmail : Execution Ended");
         String toEmail = user.getEmail();
         String senderEmail = fromEmail;
         String subject = subjectMessage;
@@ -61,12 +61,13 @@ public class EmailServiceImpl implements EmailService {
         message.setText(mailMessage);
 
         javaMailSender.send(message);
+        logger.info("SendEmail : Execution Ended");
     }
 
 
     // Method to verify user email verification token
     public String verifyVerificationToken(String token, String SiteUrl){
-        logger.info("verifyVerificationToken Executed");
+        logger.info("verifyVerificationToken : start Executing");
         // take verification Token from verificationToken table using findByVerification query
         VerificationToken verificationToken = verificationTokenRepo.findByVerificationToken(token);
         // check if verificationToken not exists
@@ -92,8 +93,10 @@ public class EmailServiceImpl implements EmailService {
                 return messageSource.getMessage("api.response.verifyVerificationToken.isExpired",null,Locale.ENGLISH);
             }
             user.setActive(true);
+            logger.info("verifyVerificationToken : setUser Active");
             userRepo.save(user);
             verificationTokenRepo.delete(verificationToken);
+            logger.info("verifyVerificationToken : Execution End");
             return messageSource.getMessage("api.response.accountVerified",null,Locale.ENGLISH);
         }
 
@@ -106,7 +109,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     public String regenerateToken(String userEmail, String siteUrl){
-        logger.info("regenerateToken Executed");
+        logger.info("regenerateToken : Execution Start");
         User user = userRepo.findByEmail(userEmail);
         // check if user exists
         if (user == null) {
@@ -121,6 +124,7 @@ public class EmailServiceImpl implements EmailService {
             VerificationToken token = verificationTokenRepo.findByUser(user);
             // delete token if already exists
             if (token != null) {
+                logger.info("regenerateToken : Delete Token");
                 verificationTokenRepo.delete(token);
                 sendEmail(user, siteUrl , "");
             }
@@ -129,11 +133,13 @@ public class EmailServiceImpl implements EmailService {
                 sendEmailCustomer(user, siteUrl);
             }
         }
+        logger.info("regenerateToken : Execution End");
         return messageSource.getMessage("api.response.checkMail",null,Locale.ENGLISH);
     }
 
    // Method to verify token & give next steps to reset password
     public String resetPasswordEmail(String token, String userPassword, String userConfirmPassword) {
+        logger.info("ResetPasswordEmail : Execution Start");
         // get token from verification repo
         VerificationToken verificationToken = verificationTokenRepo.findByVerificationToken(token);
         // check
@@ -161,8 +167,11 @@ public class EmailServiceImpl implements EmailService {
                 user.setPassword(userEncodePassword);
                 user.setPasswordUpdateDate(new Date());
                 userRepo.save(user);
+                logger.info("ResetPasswordEmail : User Save");
                 verificationTokenRepo.delete(verificationToken);
+                logger.info("ResetPasswordEmail : verification Token Delete");
                 sendPasswordChangeMail(user);
+                logger.info("ResetPasswordEmail : Execution End");
                 return messageSource.getMessage("api.response.passwordChanged",null,Locale.ENGLISH);
             }
 
@@ -171,11 +180,13 @@ public class EmailServiceImpl implements EmailService {
 
 
     public void sendEmailSeller(User user){
-        logger.info("SendEmailSeller Executed");
+        logger.info("SendEmailSeller : Execution Start");
         String  message = messageSource.getMessage("api.response.seller.Register",null,Locale.ENGLISH);
         String subject = messageSource.getMessage("api.response.seller.Register.subject",null,Locale.ENGLISH);
         message = message.replace("[[name]]", user.getFirstName());
+        logger.info("SendEmailSeller Subject : " + subject);
         sendEmail(user,message,subject);
+        logger.info("SendEmailSeller : Execution End");
 
     }
 
@@ -188,8 +199,10 @@ public class EmailServiceImpl implements EmailService {
         String verifyURL = siteUrl + "/confirm?token=" + (verificationToken.getVerificationToken());
         emailMessage = emailMessage.replace("[[name]]", user.getFirstName());
         emailMessage = emailMessage.replace("[[URL]]", verifyURL);
+        logger.info("SendEmailCustomer Subject : " + subject);
         sendEmail(user,emailMessage,subject);
 
+        logger.info("SendEmailCustomer : Execution End");
     }
 
 
