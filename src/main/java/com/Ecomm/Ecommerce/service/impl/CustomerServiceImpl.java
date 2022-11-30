@@ -8,6 +8,7 @@ import com.Ecomm.Ecommerce.Dto.UpdateDto.CustomerUpdateDto;
 import com.Ecomm.Ecommerce.entities.Address;
 import com.Ecomm.Ecommerce.entities.Customer;
 import com.Ecomm.Ecommerce.entities.User;
+import com.Ecomm.Ecommerce.handler.InvalidException;
 import com.Ecomm.Ecommerce.handler.PasswordNotMatchedException;
 import com.Ecomm.Ecommerce.handler.ResourceNotFoundException;
 import com.Ecomm.Ecommerce.repository.AddressRepo;
@@ -15,6 +16,7 @@ import com.Ecomm.Ecommerce.repository.CustomerRepo;
 import com.Ecomm.Ecommerce.repository.UserRepo;
 import com.Ecomm.Ecommerce.service.CustomerService;
 import com.Ecomm.Ecommerce.service.EmailService;
+import com.Ecomm.Ecommerce.service.ImageService;
 import com.Ecomm.Ecommerce.utils.IgnoreNull;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,8 +25,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
+import java.io.IOException;
 import java.util.*;
 
 @Service
@@ -47,7 +51,10 @@ public class CustomerServiceImpl implements CustomerService {
     @Autowired
     BCryptPasswordEncoder passwordEncoder;
 
-    protected final Log logger = LogFactory.getLog(getClass());
+    @Autowired
+    ImageService imageService;
+
+    protected final Log logger = LogFactory.getLog(CustomerServiceImpl.class);
 
     public CustomerProfileDto getCustomerProfile(String userEmail){
         logger.info("Get Customer Profile : Execution Start");
@@ -78,13 +85,35 @@ public class CustomerServiceImpl implements CustomerService {
 
    }
 
-    public String updateProfile(String userEmail, CustomerUpdateDto customerUpdateDto){
+    public String updateProfile(String userEmail, CustomerUpdateDto customerUpdateDto, MultipartFile image){
         logger.info("Update Profile : Execution Start");
         User user = userRepo.findByEmail(userEmail);
         Customer customer = user.getCustomer();
 
         BeanUtils.copyProperties(customerUpdateDto, user, IgnoreNull.getNullPropertyNames(customerUpdateDto));
         BeanUtils.copyProperties(customerUpdateDto, customer, IgnoreNull.getNullPropertyNames(customerUpdateDto));
+
+        if(!image.isEmpty()) {
+            if ((image.getContentType().equals("image/jpg")
+                    || image.getContentType().equals("image/jpeg")
+                    || image.getContentType().equals("image/png"))) {
+                try {
+                    logger.info("Update Profile : Image Saving");
+                    imageService.saveImage(userEmail, image);
+                    logger.info("Update Profile : Image Saved");
+                    userRepo.save(user);
+                    customerRepo.save(customer);
+                    logger.info("Update Profile : customer & User Saved");
+                    logger.info("Update Profile : Execution End");
+                    return messageSource.getMessage("api.response.profileUpdate",null, Locale.ENGLISH);
+
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                throw new InvalidException(messageSource.getMessage("api.error.InvalidFile",null, Locale.ENGLISH));
+            }
+        }
 
         userRepo.save(user);
         logger.info("Update Profile : User Saved");

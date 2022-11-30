@@ -7,12 +7,14 @@ import com.Ecomm.Ecommerce.Dto.UpdateDto.SellerUpdateDto;
 import com.Ecomm.Ecommerce.entities.Address;
 import com.Ecomm.Ecommerce.entities.Seller;
 import com.Ecomm.Ecommerce.entities.User;
+import com.Ecomm.Ecommerce.handler.InvalidException;
 import com.Ecomm.Ecommerce.handler.PasswordNotMatchedException;
 import com.Ecomm.Ecommerce.handler.ResourceNotFoundException;
 import com.Ecomm.Ecommerce.handler.UserNotFoundException;
 import com.Ecomm.Ecommerce.repository.AddressRepo;
 import com.Ecomm.Ecommerce.repository.SellerRepo;
 import com.Ecomm.Ecommerce.repository.UserRepo;
+import com.Ecomm.Ecommerce.service.ImageService;
 import com.Ecomm.Ecommerce.service.SellerService;
 import com.Ecomm.Ecommerce.utils.IgnoreNull;
 import org.apache.commons.logging.Log;
@@ -23,7 +25,10 @@ import org.springframework.context.MessageSource;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.mail.Multipart;
+import java.io.IOException;
 import java.util.Date;
 import java.util.Locale;
 
@@ -46,6 +51,9 @@ public class SellerServiceImpl implements SellerService {
     BCryptPasswordEncoder passwordEncoder;
 
     @Autowired EmailServiceImpl emailService;
+
+    @Autowired
+    ImageService imageService;
 
     protected final Log logger = LogFactory.getLog(getClass());
 
@@ -83,7 +91,7 @@ public class SellerServiceImpl implements SellerService {
     }
 
 
-    public String updateSellerProfile(String userEmail, SellerUpdateDto sellerUpdateDto) {
+    public String updateSellerProfile(String userEmail, SellerUpdateDto sellerUpdateDto,  MultipartFile image) {
         logger.info("Update Seller Profile : Execution Start");
         User user = userRepo.findByEmail(userEmail);
         Seller seller = user.getSeller();
@@ -91,6 +99,28 @@ public class SellerServiceImpl implements SellerService {
 
         BeanUtils.copyProperties(sellerUpdateDto, user, IgnoreNull.getNullPropertyNames(sellerUpdateDto));
         BeanUtils.copyProperties(sellerUpdateDto, seller, IgnoreNull.getNullPropertyNames(sellerUpdateDto));
+
+        if(!image.isEmpty()) {
+            if ((image.getContentType().equals("image/jpg")
+                    || image.getContentType().equals("image/jpeg")
+                    || image.getContentType().equals("image/png"))) {
+                try {
+                    logger.info("Update Profile : Image Saving");
+                    imageService.saveImage(userEmail, image);
+                    logger.info("Update Profile : Image Saved");
+                    userRepo.save(user);
+                    sellerRepo.save(seller);
+                    logger.info("Update Profile : customer & User Saved");
+                    logger.info("Update Profile : Execution End");
+                    return messageSource.getMessage("api.response.profileUpdate",null, Locale.ENGLISH);
+
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                throw new InvalidException(messageSource.getMessage("api.error.InvalidFile",null, Locale.ENGLISH));
+            }
+        }
 
         userRepo.save(user);
         logger.info("Update Seller Profile : User Save");

@@ -2,6 +2,7 @@ package com.Ecomm.Ecommerce.service;
 
 import com.Ecomm.Ecommerce.Dto.CategoryDto;
 import com.Ecomm.Ecommerce.Dto.CategoryMetaFieldDto;
+import com.Ecomm.Ecommerce.Dto.ResponseDto.CategoryViewDto;
 import com.Ecomm.Ecommerce.Dto.UpdateDto.CategoryUpdateDto;
 import com.Ecomm.Ecommerce.entities.CategoryMetadataField;
 
@@ -16,4 +17,6 @@ public interface CategoryService {
     String saveCategory(CategoryDto categoryDto);
 
     public  String updateCategory(long categoryId,CategoryUpdateDto categoryDto);
+
+    public CategoryViewDto fetchCategory(long id);
 }

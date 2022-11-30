@@ -6,6 +6,7 @@ import com.Ecomm.Ecommerce.Dto.UpdateDto.AddressUpdateDto;
 import com.Ecomm.Ecommerce.Dto.ResponseDto.CustomerProfileDto;
 import com.Ecomm.Ecommerce.Dto.UpdateDto.CustomerUpdateDto;
 import com.Ecomm.Ecommerce.entities.Address;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -14,7 +15,7 @@ public interface CustomerService {
 
    public List<Address> getCustomerAddress(String userEmail);
 
-    public String updateProfile(String userEmail, CustomerUpdateDto customerProfileDto);
+    public String updateProfile(String userEmail, CustomerUpdateDto customerProfileDto, MultipartFile image);
 
     public String updatePassword(String userEmail, PasswordDto customerPasswordDto);
 

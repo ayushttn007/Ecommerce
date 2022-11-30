@@ -59,7 +59,7 @@ UserAccountService userAccountService;
     }
 
     // api to re-send activation link using email.
-    @PostMapping(path ="/api/resend_token")
+    @PostMapping(path ="/api/resend/token")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ResponseEntity<String> resendVerification(@Valid @RequestBody EmailDto emailDto, HttpServletRequest request) throws MessagingException, UnsupportedEncodingException {
         String siteUrl = emailService.getSiteURL(request);
@@ -74,14 +74,14 @@ UserAccountService userAccountService;
     }
 
 
-    @PostMapping(path="/forgot_password")
+    @PostMapping(path="/forgot/password")
     public ResponseEntity<String> forgotPassword(@Valid @RequestBody EmailDto emailDtO){
         String userEmail = emailDtO.getEmail();
         String response = userAccountService.userForgotPassword(userEmail);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PatchMapping(path= "/reset_password")
+    @PatchMapping(path= "/reset/password")
     public ResponseEntity<String> resetPassword(@Param("token") String token, @Valid @RequestBody PasswordDto passwordDto, HttpServletRequest request){
         String siteUrl = emailService.getSiteURL(request);
         String userPassword = passwordDto.getPassword();

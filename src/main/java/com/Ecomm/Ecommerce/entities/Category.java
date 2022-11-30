@@ -1,5 +1,6 @@
 package com.Ecomm.Ecommerce.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -24,5 +25,6 @@ public class Category {
     private Category parent;
 
     @OneToMany(mappedBy = "parent",cascade = CascadeType.ALL)
+    @JsonBackReference
     private Set<Category>children = new HashSet<>();
 }

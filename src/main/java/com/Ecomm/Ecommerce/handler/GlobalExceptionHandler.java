@@ -64,7 +64,7 @@ public class GlobalExceptionHandler {
     public final ResponseEntity<ErrorFormat> InvalidTokenExceptionHandler(InvalidTokenException ex, WebRequest request) throws InvalidTokenException {
         ErrorFormat errorFormat = new ErrorFormat(LocalDateTime.now(), ex.getMessage(), request.getDescription(false),HttpStatus.NOT_FOUND);
 
-        return new ResponseEntity<>(errorFormat, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(errorFormat, HttpStatus.BAD_REQUEST);
 
     }
 
@@ -83,4 +83,13 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorFormat, HttpStatus.NOT_FOUND);
 
     }
+
+    @ExceptionHandler(InvalidException.class)
+    public final ResponseEntity<ErrorFormat> InvalidExceptionHandler(InvalidException ex, WebRequest request) throws InvalidException {
+        ErrorFormat errorFormat = new ErrorFormat(LocalDateTime.now(), ex.getMessage(), request.getDescription(false),HttpStatus.BAD_REQUEST);
+
+        return new ResponseEntity<>(errorFormat, HttpStatus.BAD_REQUEST);
+
+    }
+
 }

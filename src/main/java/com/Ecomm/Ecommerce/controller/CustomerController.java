@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -39,15 +40,17 @@ public class CustomerController {
         return new ResponseEntity<>(customerAddress,HttpStatus.OK);
     }
 
-    @PatchMapping("/customer/update_profile")
+    @PatchMapping("/customer/update/profile")
     @PreAuthorize("hasAuthority('CUSTOMER')")
-    public ResponseEntity<String> UpdateProfile(Authentication authentication,@Valid  @RequestBody CustomerUpdateDto customerUpdateDto){
+    public ResponseEntity<String> UpdateProfile(Authentication authentication,
+                                                @RequestPart("image") MultipartFile image,
+                                                @Valid @RequestPart("details") CustomerUpdateDto customerUpdateDto){
         String userEmail = authentication.getName();
-        String responseMessage = customerService.updateProfile(userEmail,customerUpdateDto);
+        String responseMessage = customerService.updateProfile(userEmail,customerUpdateDto , image);
         return new ResponseEntity<>(responseMessage,HttpStatus.OK);
     }
 
-    @PatchMapping("/customer/update_password")
+    @PatchMapping("/customer/update/password")
     @PreAuthorize("hasAuthority('CUSTOMER')")
     public ResponseEntity<String> UpdatePassword(Authentication authentication,@Valid @RequestBody PasswordDto customerPasswordDto){
         String userEmail = authentication.getName();
@@ -55,14 +58,14 @@ public class CustomerController {
         return new ResponseEntity<>(responseMessage,HttpStatus.OK);
     }
 
-    @PatchMapping("/customer/update_address")
+    @PatchMapping("/customer/update/address")
     @PreAuthorize("hasAuthority('CUSTOMER')")
     public  ResponseEntity<String> updateAddress(Authentication authentication, @Valid @RequestBody AddressUpdateDto customerAddressDao, @RequestParam long addressid){
         String userEmail = authentication.getName();
         String responseMessage = customerService.updateAddress(userEmail,customerAddressDao,addressid);
         return new ResponseEntity<>(responseMessage,HttpStatus.OK);
     }
-    @DeleteMapping ("/customer/delete_address")
+    @DeleteMapping ("/customer/delete/address")
     @PreAuthorize("hasAuthority('CUSTOMER')")
     public ResponseEntity<String> deleteAddress(Authentication authentication,@RequestParam long address_id){
         String userEmail = authentication.getName();
@@ -70,7 +73,7 @@ public class CustomerController {
         return new ResponseEntity<>(responseMessage,HttpStatus.OK);
     }
 
-    @PostMapping("customer/add_address")
+    @PostMapping("customer/add/address")
     @PreAuthorize("hasAuthority('CUSTOMER')")
     public ResponseEntity<String> addAddress(Authentication authentication,@Valid @RequestBody AddressDto customerAddressDto){
         String userEmail = authentication.getName();

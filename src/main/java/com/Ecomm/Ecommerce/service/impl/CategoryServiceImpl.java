@@ -2,9 +2,12 @@ package com.Ecomm.Ecommerce.service.impl;
 
 import com.Ecomm.Ecommerce.Dto.CategoryDto;
 import com.Ecomm.Ecommerce.Dto.CategoryMetaFieldDto;
+import com.Ecomm.Ecommerce.Dto.ChildCategoryDto;
+import com.Ecomm.Ecommerce.Dto.ResponseDto.CategoryViewDto;
 import com.Ecomm.Ecommerce.Dto.UpdateDto.CategoryUpdateDto;
 import com.Ecomm.Ecommerce.entities.Category;
 import com.Ecomm.Ecommerce.entities.CategoryMetadataField;
+import com.Ecomm.Ecommerce.handler.InvalidException;
 import com.Ecomm.Ecommerce.handler.ResourceNotFoundException;
 import com.Ecomm.Ecommerce.handler.UserAlreadyExistsException;
 import com.Ecomm.Ecommerce.repository.CategoryMetaDataFieldRepo;
@@ -15,9 +18,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 @Service
 @Transactional
@@ -88,5 +89,31 @@ public class CategoryServiceImpl implements CategoryService {
        categoryRepo.save(category);
        return messageSource.getMessage("api.response.categoryUpdate",null,Locale.ENGLISH);
    }
+
+
+//    Method to return categories
+    public CategoryViewDto fetchCategory(long id) {
+        Category category = categoryRepo.findById(id).orElseThrow(() -> new InvalidException(
+                messageSource.getMessage("api.error.IdNotFound", null, Locale.ENGLISH)
+        ));
+        CategoryViewDto categoryViewDto = new CategoryViewDto();
+        categoryViewDto.setId(category.getId());
+        categoryViewDto.setName(category.getName());
+        categoryViewDto.setParent(category.getParent());
+
+
+        Set<ChildCategoryDto> childList = new HashSet<>();
+
+        for(Category child: category.getChildren()){
+            ChildCategoryDto childCategoryDto = new ChildCategoryDto();
+            childCategoryDto.setId(child.getId());
+            childCategoryDto.setName(child.getName());
+            childList.add(childCategoryDto);
+
+        }
+        categoryViewDto.setChildren(childList);
+        return categoryViewDto;
+
+    }
 
 }
