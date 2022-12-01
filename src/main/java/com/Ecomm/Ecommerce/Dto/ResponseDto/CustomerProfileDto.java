@@ -13,4 +13,6 @@ public class CustomerProfileDto {
     private boolean is_active;
     private  String contact;
 
+    private byte[] image;
+
 }

@@ -19,6 +19,12 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Res
 public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
     private static final String RESOURCE_ID = "Ecommerce";
+    private static final String[] SWAGGER_WHITELIST = {
+
+            // Swagger UI v3 (OpenAPI)
+            "/v2/api-docs/**",
+            "/swagger-ui/**"
+    };
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -33,19 +39,14 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
                         "/api/register",
                         "/api/products",
                         "/confirm",
-                        "/api/resend_token",
-                        "/forgot_password",
-                        "/reset_password",
-                        "/v2/api-docs",
-                        "/configuration/ui",
-                        "/swagger-resources/**",
-                        "/configuration/security",
-                        "/webjars/**",
-                        "/swagger-ui/index.html#/",
+                        "/api/resend/token",
+                        "/forgot/password",
+                        "/reset/password",
                         "/add/metadata_field",
                         "/metadata_field",
                         "/add/category",
                         "/update/category").permitAll()
+                .antMatchers(SWAGGER_WHITELIST).permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .sessionManagement()

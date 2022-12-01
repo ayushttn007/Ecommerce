@@ -13,5 +13,6 @@ public class SellerProfileDto {
     private  String companyContact;
     private  String companyName;
     private String gst;
+    private byte[] image;
     private Address address;
 }

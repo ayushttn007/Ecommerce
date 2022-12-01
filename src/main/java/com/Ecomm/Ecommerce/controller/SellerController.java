@@ -35,7 +35,8 @@ public class SellerController {
 
     @PatchMapping("/seller/update/profile")
     @PreAuthorize("hasAuthority('SELLER')")
-    public ResponseEntity<String> UpdateProfile(Authentication authentication, @RequestPart("image") MultipartFile image,
+    public ResponseEntity<String> UpdateProfile(Authentication authentication,
+                                                @RequestPart("image") MultipartFile image,
                                                 @Valid @RequestPart("details")  SellerUpdateDto sellerUpdateDao){
         String userEmail = authentication.getName();
          String responseMessage = sellerService.updateSellerProfile(userEmail,sellerUpdateDao,image);

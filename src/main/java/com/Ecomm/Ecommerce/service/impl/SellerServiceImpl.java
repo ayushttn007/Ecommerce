@@ -85,6 +85,11 @@ public class SellerServiceImpl implements SellerService {
         sellerProfile.setCompanyName(seller.getCompanyName());
         sellerProfile.setAddress(seller.getAddress());
 
+        byte[] userImage = imageService.getImage(userEmail);
+        if(userImage.length !=0){
+            sellerProfile.setImage(imageService.getImage(userEmail));
+        }
+
         logger.info("get Seller Profile : Execution End");
         return sellerProfile;
 

@@ -3,11 +3,14 @@ package com.Ecomm.Ecommerce.Dto.UpdateDto;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 @Getter
 @Setter
+
 public class SellerUpdateDto {
 
     @Size(min = 2, max = 30, message = "Must contain 2-30 characters.")

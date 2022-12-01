@@ -70,6 +70,11 @@ public class CustomerServiceImpl implements CustomerService {
         customerProfile.setEmail(user.getEmail());
         customerProfile.set_active(user.isActive());
         customerProfile.setContact(customer.getContact());
+
+        byte[] userImage = imageService.getImage(userEmail);
+        if(userImage.length !=0){
+            customerProfile.setImage(imageService.getImage(userEmail));
+        }
         logger.info("Get Customer Profile : Execution End");
         return customerProfile;
     }

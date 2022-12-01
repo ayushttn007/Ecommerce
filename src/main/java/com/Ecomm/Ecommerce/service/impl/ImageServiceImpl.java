@@ -10,8 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.transaction.Transactional;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -30,11 +28,12 @@ public class ImageServiceImpl implements ImageService {
     public void saveImage(String email, MultipartFile image) throws IOException {
 
         User user= userRepo .findByEmail(email);
+        String userImgName = user.getFirstName() + user.getId();
         File folder = new File(imgPath);
         if(!folder.exists()){
             folder.mkdir();
         }
-        String filePath = imgPath + File.separator + user.getEmail()+ ".png";
+        String filePath = imgPath + File.separator + userImgName+ ".png";
         Files.copy(image.getInputStream(), Paths.get(filePath), StandardCopyOption.REPLACE_EXISTING);
 
     }
@@ -43,12 +42,14 @@ public class ImageServiceImpl implements ImageService {
     public byte[] getImage(String email) {
         logger.info("getImage :execution start.");
         final String imgName = email;
-        String filename = imgPath + File.separator + email + ".png";
+        User user= userRepo .findByEmail(email);
+        String userImgName = user.getFirstName() + user.getId();
+        String filename = imgPath + File.separator + userImgName + ".png";
 
         File folder = new File(imgPath);
         File[] files = folder.listFiles(new FilenameFilter() {
             public boolean accept(File folder , String name) {
-                return name.startsWith(imgName);
+                return name.startsWith(userImgName);
             }});
 
         if (files.length==0){
