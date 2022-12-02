@@ -8,17 +8,20 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
+
 public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public final ResponseEntity<ErrorFormat> GlobalExceptionHandler(Exception ex, WebRequest request) throws Exception{
-        ErrorFormat errorFormat = new ErrorFormat(LocalDateTime.now(), ex.getMessage(), request.getDescription(false), HttpStatus.INTERNAL_SERVER_ERROR);
-        return new ResponseEntity<>(errorFormat, HttpStatus.INTERNAL_SERVER_ERROR);
+        ErrorFormat errorFormat = new ErrorFormat(LocalDateTime.now(), ex.getMessage(), request.getDescription(false), HttpStatus.METHOD_NOT_ALLOWED);
+        return new ResponseEntity<>(errorFormat, HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     // PasswordNotMatched Exception Handler
@@ -34,7 +37,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UserAlreadyExistsException.class)
     public ResponseEntity<ErrorFormat> UserAlreadyExistsExceptionHandler(UserAlreadyExistsException ex, WebRequest request) throws  UserAlreadyExistsException{
         ErrorFormat errorFormat = new ErrorFormat(LocalDateTime.now(), ex.getMessage(), request.getDescription(false), HttpStatus.BAD_REQUEST);
-        return new ResponseEntity<>(errorFormat, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorFormat, HttpStatus.FORBIDDEN);
     }
 
     // ResourceNotFound Exception Handler
@@ -64,7 +67,7 @@ public class GlobalExceptionHandler {
     public final ResponseEntity<ErrorFormat> InvalidTokenExceptionHandler(InvalidTokenException ex, WebRequest request) throws InvalidTokenException {
         ErrorFormat errorFormat = new ErrorFormat(LocalDateTime.now(), ex.getMessage(), request.getDescription(false),HttpStatus.NOT_FOUND);
 
-        return new ResponseEntity<>(errorFormat, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorFormat, HttpStatus.NOT_FOUND);
 
     }
 
@@ -72,7 +75,7 @@ public class GlobalExceptionHandler {
     public final ResponseEntity<ErrorFormat> AccountNotActiveHandler(AccountNotActive ex, WebRequest request) throws AccountNotActive {
         ErrorFormat errorFormat = new ErrorFormat(LocalDateTime.now(), ex.getMessage(), request.getDescription(false),HttpStatus.NOT_FOUND);
 
-        return new ResponseEntity<>(errorFormat, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(errorFormat, HttpStatus.FORBIDDEN);
 
     }
 
@@ -88,7 +91,7 @@ public class GlobalExceptionHandler {
     public final ResponseEntity<ErrorFormat> InvalidExceptionHandler(InvalidException ex, WebRequest request) throws InvalidException {
         ErrorFormat errorFormat = new ErrorFormat(LocalDateTime.now(), ex.getMessage(), request.getDescription(false),HttpStatus.BAD_REQUEST);
 
-        return new ResponseEntity<>(errorFormat, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorFormat, HttpStatus.NOT_FOUND);
 
     }
 

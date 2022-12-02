@@ -26,5 +26,10 @@ public interface EmailService {
 
     public void sendUserDeactivedMail(User user);
 
+    public void sendProductAddEmail(User user, String productDetails);
 
+
+    void sendProductActivateEmail(User seller, String productName);
+
+    void sendProductdeActivateEmail(User seller, String productName);
 }

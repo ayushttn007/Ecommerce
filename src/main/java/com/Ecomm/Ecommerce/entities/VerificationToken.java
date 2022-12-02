@@ -29,7 +29,7 @@ public class VerificationToken  extends Auditable<String> {
     @JoinColumn(nullable = false, name = "user_id")
     private User user;
 
-    static int expiryTime = 1;
+    static int expiryTime = 15;
     public VerificationToken(User user) {
         this.user = user;
         createdDate = new Date();

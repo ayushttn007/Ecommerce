@@ -2,6 +2,7 @@ package com.Ecomm.Ecommerce.Dto.UpdateDto;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.validator.constraints.ScriptAssert;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;

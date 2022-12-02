@@ -101,7 +101,6 @@ public class SellerServiceImpl implements SellerService {
         User user = userRepo.findByEmail(userEmail);
         Seller seller = user.getSeller();
 
-
         BeanUtils.copyProperties(sellerUpdateDto, user, IgnoreNull.getNullPropertyNames(sellerUpdateDto));
         BeanUtils.copyProperties(sellerUpdateDto, seller, IgnoreNull.getNullPropertyNames(sellerUpdateDto));
 

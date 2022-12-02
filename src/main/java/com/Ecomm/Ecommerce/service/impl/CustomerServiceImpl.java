@@ -101,6 +101,7 @@ public class CustomerServiceImpl implements CustomerService {
         if(!image.isEmpty()) {
             if ((image.getContentType().equals("image/jpg")
                     || image.getContentType().equals("image/jpeg")
+                    || image.getContentType().equals("image/bmp")
                     || image.getContentType().equals("image/png"))) {
                 try {
                     logger.info("Update Profile : Image Saving");

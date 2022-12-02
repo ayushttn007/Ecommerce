@@ -7,6 +7,8 @@ import com.Ecomm.Ecommerce.service.EmailService;
 import com.Ecomm.Ecommerce.service.UserAccountService;
 import com.Ecomm.Ecommerce.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,7 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.UnsupportedEncodingException;
+import java.util.Locale;
 
 @RestController
 public class Controller {
@@ -31,21 +34,32 @@ EmailService emailService;
 @Autowired
 UserAccountService userAccountService;
 
+@Autowired
+    MessageSource messageSource;
+
+
     // Register Api for Seller
     @PostMapping(path = "api/register",headers = "Role=CUSTOMER")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<String> register( @Valid @RequestBody CustomerDto customerDto,HttpServletRequest request){
+        Locale locale  = LocaleContextHolder.getLocale();
         String siteUrl = emailService.getSiteURL(request);
         userService.registerCustomer(customerDto,"CUSTOMER",siteUrl);
-        return ResponseEntity.ok().body("Please check your email to verify your account.");
+        return ResponseEntity.ok().body(
+                messageSource.getMessage("api.response.customerRegister",null,locale)
+        );
     }
 
     // Register APi for Seller
     @PostMapping(path = "api/register",headers = "Role=SELLER")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<String> register(@Valid @RequestBody SellerDto sellerDto ){
+        Locale locale  = LocaleContextHolder.getLocale();
         userService.registerSeller(sellerDto,"SELLER");
-      return ResponseEntity.ok().body("Register Successfully");
+      return ResponseEntity.ok().body(
+              messageSource.getMessage("api.response.sellerRegister",null,locale)
+
+      );
     }
 
     // verify api for register account verification and  send verification link again if expire.
@@ -87,7 +101,7 @@ UserAccountService userAccountService;
         String userPassword = passwordDto.getPassword();
         String userConfirmPassword = passwordDto.getConfirmPassword();
         String responseMessage = emailService.resetPasswordEmail(token,userPassword,userConfirmPassword);
-        return new ResponseEntity<>(responseMessage,HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(responseMessage,HttpStatus.OK);
     }
 
 
